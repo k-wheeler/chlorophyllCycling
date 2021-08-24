@@ -12,7 +12,7 @@ n.cores <- 20
 registerDoParallel(cores=n.cores)
 source('phenologyModel.R')
 
-siteData <- read.csv("PhenologyForecastData/phenologyForecastSites.csv",header=TRUE)
+siteData <- read.csv("data/phenologyForecastSites.csv",header=TRUE)
 endDate <- as.Date("2019-12-31")
 dataDirectory <- "data/"
 baseTemp <- 20
