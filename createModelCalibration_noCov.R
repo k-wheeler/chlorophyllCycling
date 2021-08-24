@@ -20,6 +20,7 @@ vars <- "noCov"
 
 #foreach(i=1:nrow(siteData)) %dopar% {
 for(i in 1:nrow(siteData)){
+  siteName <- as.character(siteData$siteName[i])
   lat <- as.numeric(siteData[i,2])
   long <- as.numeric(siteData[i,3])
   startDate <- (as.Date(siteData[i,7]))
