@@ -35,13 +35,12 @@ for(i in 1:nrow(siteData)){
   }
   TZ <- as.numeric(siteData[i,6])
   URLs <- URL
-  load(file=paste("PhenologyForecastData/",siteName,"_phenopixOutputs.RData",sep=""))
+  load(file=paste(dataDirectory,siteName,"_phenopixOutputs.RData",sep=""))
   fittedDat=allDat
   ERA5dataFolder <- paste("/projectnb/dietzelab/kiwheel/ERA5/Data/",siteName,"/",sep="")
   phenologyCalibration_Autumn(siteName=siteName,URLs=URLs,lat=lat,long=long,dataDirectory="PhenologyForecastData/",
                               startDate=startDate,endDate=endDate,baseTemp=baseTemp,
-                              ERA5dataFolder = ERA5dataFolder,vars=vars,TZ=TZ,calDIC=FALSE,fittedDat=allDat,
-                              splitYears="first")
+                              ERA5dataFolder = ERA5dataFolder,vars=vars,TZ=TZ,calDIC=FALSE,fittedDat=allDat)
 }
 
 
