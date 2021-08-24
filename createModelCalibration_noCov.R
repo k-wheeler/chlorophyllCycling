@@ -14,7 +14,7 @@ source('phenologyModel.R')
 
 siteData <- read.csv("PhenologyForecastData/phenologyForecastSites.csv",header=TRUE)
 endDate <- as.Date("2019-12-31")
-dataDirectory <- "PhenologyForecastData/"
+dataDirectory <- "data/"
 baseTemp <- 20
 vars <- "noCov"
 
