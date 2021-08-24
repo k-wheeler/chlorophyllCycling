@@ -10,6 +10,7 @@ library(doParallel)
 
 n.cores <- 20
 registerDoParallel(cores=n.cores)
+source('phenologyModel.R')
 
 siteData <- read.csv("PhenologyForecastData/phenologyForecastSites.csv",header=TRUE)
 endDate <- as.Date("2019-12-31")
