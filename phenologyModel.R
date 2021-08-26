@@ -289,7 +289,7 @@ if(vars=="noCov"){
   }
   "
   for(i in 1:nchain){
-    inits[[i]] <- list(CDDtrigger = rnorm(1,mean(transitionCDD),10))
+    inits[[i]] <- list(CDDtrigger = rnorm(1,0,10))
   }
   
 }
