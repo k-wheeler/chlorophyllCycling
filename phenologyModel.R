@@ -33,41 +33,6 @@ phenologyCalibration_Autumn <- function(siteName,
                                         vars,TZ,calDIC=FALSE,
                                         fittedDat, splitYears=""){
 
-  generalModel = "
-    model {
-  ### Data Models
-  for(yr in 1:(N)){
-  for(i in 1:n){
-  p[i,yr] ~ dnorm(x[i,yr],p.PC)
-  }
-  }
-  
-  #### Process Model
-  for(yr in 1:(N)){
-  for(i in 2:n){
-  Tair[i,yr] ~ dnorm(TairMu[i,yr],TairPrec[i,yr])
-  CDDs[i,yr] <- ifelse(Tair[i,yr]<baseTemp,CDDs[(i-1),yr]+baseTemp - Tair[i,yr],CDDs[(i-1),yr])
-  xmu[i,yr] <- max(min(x[(i-1),yr] + ifelse(CDDs[i,yr]>CDDtrigger,(b0 + (b1 * x[(i-1),yr]) + (b2 * x[(i-1),yr] ** 2)),a),x[1,yr]),0)
-  x[i,yr] ~ dnorm(xmu[i,yr],p.proc) # T(0,0.999)
-  }
-  }
-  
-  #### Priors
-  for(yr in 1:N){ ##Initial Conditions
-  x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr])
-  CDDs[1,yr] <- 0
-  }
-  p.PC ~ dgamma(s1.PC,s2.PC)
-  p.proc ~ dgamma(s1.proc,s2.proc)
-  CDDtrigger ~ dunif(CDDtrigger.lower,CDDtrigger.upper)
-  
-  a ~ dunif(a_lower,a_upper)
-  b0 ~ dunif(b0_lower,b0_upper)
-  b2 ~ dunif(b2_lower,b2_upper)
-  b1 ~ dunif(b1_lower,b1_upper) 
-}
-"
-
 nchain=5
 ###Download PhenoCam data and format
 phenoData <- matrix(nrow=0,ncol=32)
@@ -220,6 +185,41 @@ if(vars=="noCov"){
   dataFinal$a_lower <- -0.01
   dataFinal$CDDtrigger.lower <- 0
   dataFinal$CDDtrigger.upper <- 500
+  
+  generalModel = "
+    model {
+  ### Data Models
+  for(yr in 1:(N)){
+  for(i in 1:n){
+  p[i,yr] ~ dnorm(x[i,yr],p.PC)
+  }
+  }
+  
+  #### Process Model
+  for(yr in 1:(N)){
+  for(i in 2:n){
+  Tair[i,yr] ~ dnorm(TairMu[i,yr],TairPrec[i,yr])
+  CDDs[i,yr] <- ifelse(Tair[i,yr]<baseTemp,CDDs[(i-1),yr]+baseTemp - Tair[i,yr],CDDs[(i-1),yr])
+  xmu[i,yr] <- max(min(x[(i-1),yr] + ifelse(CDDs[i,yr]>CDDtrigger,(b0 + (b1 * x[(i-1),yr]) + (b2 * x[(i-1),yr] ** 2)),a),x[1,yr]),0)
+  x[i,yr] ~ dnorm(xmu[i,yr],p.proc) # T(0,0.999)
+  }
+  }
+  
+  #### Priors
+  for(yr in 1:N){ ##Initial Conditions
+  x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr])
+  CDDs[1,yr] <- 0
+  }
+  p.PC ~ dgamma(s1.PC,s2.PC)
+  p.proc ~ dgamma(s1.proc,s2.proc)
+  CDDtrigger ~ dunif(CDDtrigger.lower,CDDtrigger.upper)
+  
+  a ~ dunif(a_lower,a_upper)
+  b0 ~ dunif(b0_lower,b0_upper)
+  b2 ~ dunif(b2_lower,b2_upper)
+  b1 ~ dunif(b1_lower,b1_upper) 
+}
+"
 
   ##Determine Inits:
   transitionCDD <- numeric()
@@ -243,10 +243,56 @@ if(vars=="noCov"){
                        b1=rnorm(1,0.6,0.08),
                        b2=rnorm(1,-0.5,0.1))
   }
+}else if(vars=="b3"){
+  outputFileName <- paste0(siteName,"_b3_final_calibration_varBurn.RData")
+  dataFinal$b0_lower <- -1
+  dataFinal$b0_upper <- 0
+  dataFinal$b1_lower <- -1
+  dataFinal$b1_upper <- 0
+  dataFinal$b2_lower <- -1
+  dataFinal$b2_upper <- 0
+  dataFinal$b3_lower <- 0
+  dataFinal$b3_upper <- 1
+  
+  variableNames <- c("p.PC","x","b0","b1","b2","b3","p.proc")
+  
+  generalModel = "
+  model {
+  ### Data Models for complete years
+  for(yr in 1:(N)){
+  for(i in 1:n){
+  p[i,yr] ~ dnorm(x[i,yr],p.PC)
+  }
+  }
+  
+  #### Process Model
+  for(yr in 1:(N)){
+  for(i in 2:n){
+  Tair[i,yr] ~ dnorm(TairMu[i,yr],TairPrec[i,yr])
+  
+  xmu[i,yr] <- max(min(x[(i-1),yr] + (b0 + (b1 * x[(i-1),yr]) + (b2 * x[(i-1),yr] ** 2)) + max(0,(b3 * TairMu[i,yr])),x[1,yr]),0)
+  x[i,yr] ~ dnorm(xmu[i,yr],p.proc) #T(0,0.999)
+  }
+  }
+  
+  #### Priors
+  for(yr in 1:N){ ##Initial Conditions
+  x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr])
+  }
+  p.PC ~ dgamma(s1.PC,s2.PC)
+  p.proc ~ dgamma(s1.proc,s2.proc)
+  
+  b0 ~ dunif(b0_lower,b0_upper)
+  b1 ~ dunif(b1_lower,b1_upper)
+  b2 ~ dunif(b2_lower,b2_upper)
+  b3 ~ dunif(b3_lower,b3_upper)
+  }
+  "
 }
 
 j.model   <- jags.model(file = textConnection(generalModel),
                         data = dataFinal,
+                        inits = inits,
                         n.chains = nchain,
                         n.adapt = 1500)
 
