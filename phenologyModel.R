@@ -288,6 +288,10 @@ if(vars=="noCov"){
   b3 ~ dunif(b3_lower,b3_upper)
   }
   "
+  for(i in 1:nchain){
+    inits[[i]] <- list(CDDtrigger = rnorm(1,mean(transitionCDD),10))
+  }
+  
 }
 
 j.model   <- jags.model(file = textConnection(generalModel),
