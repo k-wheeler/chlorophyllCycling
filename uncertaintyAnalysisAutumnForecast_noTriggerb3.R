@@ -47,12 +47,15 @@ forecastStep <- function(IC,b0,b1,b2,b3,Q=0,n,NT,Tair){
   }
   
   for(t in 1:NT){
-    mu <- Xprev + b0 + (b1 * Xprev) + (b2 * Xprev **2) + b3 * Tair[t]
+    bd <- Xprev + b0 + (b1 * Xprev) + (b2 * Xprev **2) 
+    syn <- b3 * Tair[t]
     
     xNew <- numeric()
-    for(i in 1:length(mu)){
+    for(i in 1:length(bd)){
       #mu[i] <- max(0,min(mu[i],0.999))
+      mu[i] <- bd + max(syn[i],0)
       mu[i] <- max(0,min(mu[i],IC[min(i,length(IC))]))
+      
       if(length(Q)>1){
         xNew <- c(xNew,rnorm(1,mu[i],Q[i]))
       }else{
