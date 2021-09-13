@@ -49,10 +49,13 @@ forecastStep <- function(IC,b0,b1,b2,b3,Q=0,n,NT,Tair){
   for(t in 1:NT){
     bd <- Xprev + b0 + (b1 * Xprev) + (b2 * Xprev **2) 
     syn <- b3 * Tair[t]
+    if(length(syn)==1){
+      syn <- rep(syn,n)
+    }
     
     xNew <- numeric()
-    mu <- rep(NA,length(bd))
-    for(i in 1:length(bd)){
+    mu <- rep(NA,n)
+    for(i in 1:n){
       #mu[i] <- max(0,min(mu[i],0.999))
       mu[i] <- bd[i] + max(syn[i],0)
       mu[i] <- max(0,min(mu[i],IC[min(i,length(IC))]))
@@ -64,7 +67,6 @@ forecastStep <- function(IC,b0,b1,b2,b3,Q=0,n,NT,Tair){
       }
       #xNew <- c(xNew,max(0, min(0.99,xl)))
     }
-    print(range(mu))
     x[,t] <- xNew ## trunate normal process error
     Xprev <- x[,t]
   }
@@ -120,9 +122,7 @@ for(f in 1:2){
         
         days <- seq(1,NT)
         ysDet <- forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),n=1,NT=length(days),Tair=dataFinal$TairMu[,1]) #Dependent on IC, but independent for >=1
-        #ysParam <- forecastStep(IC=mean(initialXs),b0=out.mat[prow,"b0"],b1=out.mat[prow,"b1"],b2=out.mat[prow,"b2"],b3=out.mat[prow,"b3"],n=Nmc,NT=NT,Tair=dataFinal$TairMu[,1])
         ysParam <- forecastStep(IC=mean(initialXs),b0=b0[prow],b1=b1[prow],b2=b2[prow],b3=b3[prow],n=Nmc,NT=NT,Tair=dataFinal$TairMu[,1])
-        #ysDetnob3 <- forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=0,n=1,NT=length(days),Tair=dataFinal$TairMu[,1])
         ysProc <- forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),n=Nmc,NT=NT,Q=sqrt(1/out.mat$p.proc[prow]),Tair=dataFinal$TairMu[,1])
         ysIC <- forecastStep(IC=initialXs,b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),n=length(initialXs),NT=NT,Tair=dataFinal$TairMu[,1])
         
