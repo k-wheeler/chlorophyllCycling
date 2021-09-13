@@ -68,7 +68,7 @@ sites <- c("harvard","bostoncommon","asuhighlands","bullshoals")
 years <- c(2,3,2,2)
 dtes <- seq(as.Date("2021-08-01"),as.Date("2021-12-31"),"day")
 
-pdf(file="UncertaintyAnalysis_HFposterFigures.pdf",height=6,width=10)
+pdf(file="UncertaintyAnalysis_HFposterFigures.pdf",height=6,width=8)
 for(s in 1:length(sites)){
   fileName <- paste0(sites[s],"_b3_final_calibration_varBurn.RData")
   print(fileName)
@@ -94,17 +94,14 @@ for(s in 1:length(sites)){
   N.IP.ci = apply(ysParam,2,quantile,c(0.025,0.5,0.975))
   N.Proc.ci = apply(ysProc,2,quantile,c(0.025,0.5,0.975))
   N.IC.ci = apply(ysIC,2,quantile,c(0.025,0.5,0.975))
+
+  plot(dtes,dataFinal$p[,years[s]],pch=20,main=paste(siteName,years[s]),ylim=c(0,1),xlab="Time",ylab="Rescaled GCC")
   
-  print(length(dtes))
-  print(length(dataFinal$p[,years[s]]))
-  print(length(N.IP.ci[1,]))
-  plot(dtes,dataFinal$p[,years[s]],pch=20,main=paste(siteName,years[s]),ylim=c(0,1),xlab="Time",ylab="Rescaled gcc")
-  
-  ecoforecastR::ciEnvelope(dtes,N.Proc.ci[1,],N.Proc.ci[3,],col=col.alpha("#66c2a5",0.5))
-  ecoforecastR::ciEnvelope(dtes,N.IP.ci[1,],N.IP.ci[3,],col=col.alpha("#fc8d62",0.5))
-  ecoforecastR::ciEnvelope(dtes,N.IC.ci[1,],N.IC.ci[3,],col=col.alpha("#8da0cb",0.5))
-  
-  lines(seq(1,length(dataFinal$p[,years[s]])),ysDet,col="black",lwd=3)
+  ecoforecastR::ciEnvelope(dtes,N.Proc.ci[1,],N.Proc.ci[3,],col=col.alpha("#66c2a5",1)) #green
+  ecoforecastR::ciEnvelope(dtes,N.IP.ci[1,],N.IP.ci[3,],col=col.alpha("#fc8d62",0.75)) #orange
+  ecoforecastR::ciEnvelope(dtes,N.IC.ci[1,],N.IC.ci[3,],col=col.alpha("#8da0cb",0.5)) #purple 
+  points(dtes,dataFinal$p[,years[s]],pch=20)
+  lines(dtes,ysDet,col="black",lwd=3)
 
 }
 dev.off()
