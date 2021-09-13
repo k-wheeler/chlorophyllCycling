@@ -94,7 +94,9 @@ for(s in 1:length(sites)){
   N.IP.ci = quantile(ysParam,c(0.025,0.5,0.975))
   N.Proc.ci = quantile(ysProc,c(0.025,0.5,0.975))
   N.IC.ci = quantile(ysIC,c(0.025,0.5,0.975))
-  
+  print(length(dtes))
+  print(length(dataFinal$p))
+  print(length(N.IP.ci))
   plot(dtes,dataFinal$p,pch=20,main=paste(siteName,years[s]),ylim=c(0,1),xlab="Time",ylab="Rescaled gcc")
   
   ecoforecastR::ciEnvelope(dtes,N.Proc.ci[1,],N.Proc.ci[3,],col=col.alpha("#66c2a5",0.5))
