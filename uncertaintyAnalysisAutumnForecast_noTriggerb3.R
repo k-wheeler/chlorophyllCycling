@@ -85,8 +85,8 @@ allb1s <- matrix(ncol=0,nrow=4000)
 allb2s <- matrix(ncol=0,nrow=4000)
 allb3s <- matrix(ncol=0,nrow=4000)
 
-#for(f in 1:length(files)){
-for(f in 1:2){
+for(f in 1:length(files)){
+#for(f in 1:2){
   
   fileName <- files[f]
   if(strsplit(fileName,"_")[[1]][1]!="partial"){
