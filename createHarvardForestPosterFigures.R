@@ -68,7 +68,7 @@ sites <- c("harvard","bostoncommon","asuhighlands","bullshoals")
 years <- c(2,3,2,2)
 dtes <- seq(as.Date("2021-08-01"),as.Date("2021-12-31"))
 
-pdf(file="UncertaintyAnalysis_HFposterFigures.pdf",height=6,width=40)
+pdf(file="UncertaintyAnalysis_HFposterFigures.pdf",height=6,width=10)
 for(s in 1:length(sites)){
   fileName <- paste0(sites[s],"_b3_final_calibration_varBurn.RData")
   print(fileName)
