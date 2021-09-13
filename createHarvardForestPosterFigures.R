@@ -64,8 +64,8 @@ b2 <- out.mat$b2
 b3 <- out.mat$b3
 prow = sample.int(nrow(out.mat),Nmc,replace=TRUE)
 
-sites <- c("harvard","bostoncommon","asuhighlands","bullshoals")
-years <- c(2,3,2,2)
+sites <- c("harvard","morganmonroe","asuhighlands","bullshoals")
+years <- c(2,2,2,2)
 dtes <- seq(as.Date("2021-08-01"),as.Date("2021-12-31"),"day")
 
 pdf(file="UncertaintyAnalysis_HFposterFigures.pdf",height=6,width=8)
@@ -99,7 +99,7 @@ for(s in 1:length(sites)){
   
   ecoforecastR::ciEnvelope(dtes,N.Proc.ci[1,],N.Proc.ci[3,],col=col.alpha("#66c2a5",1)) #green
   ecoforecastR::ciEnvelope(dtes,N.IP.ci[1,],N.IP.ci[3,],col=col.alpha("#fc8d62",0.75)) #orange
-  ecoforecastR::ciEnvelope(dtes,N.IC.ci[1,],N.IC.ci[3,],col=col.alpha("#8da0cb",0.5)) #purple 
+  ecoforecastR::ciEnvelope(dtes,N.IC.ci[1,],N.IC.ci[3,],col=col.alpha("#8da0cb",0.6)) #purple 
   points(dtes,dataFinal$p[,years[s]],pch=20)
   lines(dtes,ysDet,col="black",lwd=3)
 
