@@ -51,7 +51,7 @@ forecastStep <- function(IC,b0,b1,b2,b3,Q=0,n,NT,Tair){
     syn <- b3 * Tair[t]
     
     xNew <- numeric()
-    mu <- bd+syn
+    mu <- rep(NA,length(bd))
     for(i in 1:length(bd)){
       #mu[i] <- max(0,min(mu[i],0.999))
       mu[i] <- bd[i] + max(syn[i],0)
@@ -64,6 +64,7 @@ forecastStep <- function(IC,b0,b1,b2,b3,Q=0,n,NT,Tair){
       }
       #xNew <- c(xNew,max(0, min(0.99,xl)))
     }
+    print(range(mu))
     x[,t] <- xNew ## trunate normal process error
     Xprev <- x[,t]
   }
