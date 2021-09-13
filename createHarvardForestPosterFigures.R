@@ -97,12 +97,16 @@ for(s in 1:length(sites)){
 
   plot(dtes,dataFinal$p[,years[s]],pch=20,main=paste(siteName,years[s]),ylim=c(0,1),xlab="Time",ylab="Rescaled GCC")
   
-  ecoforecastR::ciEnvelope(dtes,N.Proc.ci[1,],N.Proc.ci[3,],col=col.alpha("#66c2a5",0.7)) #green
-  ecoforecastR::ciEnvelope(dtes,N.IP.ci[1,],N.IP.ci[3,],col=col.alpha("#fc8d62",0.7)) #orange
-  ecoforecastR::ciEnvelope(dtes,N.IC.ci[1,],N.IC.ci[3,],col=col.alpha("#8da0cb",0.7)) #purple 
+  ecoforecastR::ciEnvelope(dtes,N.Proc.ci[1,],N.Proc.ci[3,],col=col.alpha("#66c2a5",1)) #green
+  ecoforecastR::ciEnvelope(dtes,N.IP.ci[1,],N.IP.ci[3,],col=col.alpha("#fc8d62",1)) #orange
+  ecoforecastR::ciEnvelope(dtes,N.IC.ci[1,],N.IC.ci[3,],col=col.alpha("#8da0cb",1)) #purple 
   points(dtes,dataFinal$p[,years[s]],pch=20)
   lines(dtes,ysDet,col="black",lwd=3)
 
 }
+plot(numeric(),numeric(),ylim=c(0,1),xlim=c(0,1))
+legend("topleft",col=c("black","black","#8da0cb","#fc8d62","#66c2a5"),
+       c("PhenoCam Observations","Mean Estimate","Initial Condition Uncertainty","Parameter Uncertainty",
+         "Process Uncertainty"),pch=c(20,15,15,15,15))
 dev.off()
 
