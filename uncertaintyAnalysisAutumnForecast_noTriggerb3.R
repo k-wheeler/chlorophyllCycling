@@ -47,7 +47,7 @@ forecastStep <- function(IC,b0,b1,b2,b3,Q=0,n,NT,Tair){
   }
   
   for(t in 1:NT){
-    mu <- Xprev + b0 + (b1 * Xprev) + (b2 * Xprev **2) + max(0,b3 * Tair[t])
+    mu <- Xprev + b0 + (b1 * Xprev) + (b2 * Xprev **2) + b3 * Tair[t]
     
     xNew <- numeric()
     for(i in 1:length(mu)){
@@ -78,7 +78,8 @@ allb1s <- matrix(ncol=0,nrow=4000)
 allb2s <- matrix(ncol=0,nrow=4000)
 allb3s <- matrix(ncol=0,nrow=4000)
 
-for(f in 1:length(files)){
+#for(f in 1:length(files)){
+for(f in 1:2){
   
   fileName <- files[f]
   if(strsplit(fileName,"_")[[1]][1]!="partial"){
