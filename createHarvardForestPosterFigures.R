@@ -91,9 +91,10 @@ for(s in 1:length(sites)){
   ysProc <- forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),n=Nmc,NT=NT,Q=sqrt(1/out.mat$p.proc[prow.pred]),Tair=dataFinal$TairMu[,years[s]])
   ysIC <- forecastStep(IC=initialXs,b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),n=length(initialXs),NT=NT,Tair=dataFinal$TairMu[,years[s]])
   
-  N.IP.ci = quantile(ysParam,c(0.025,0.5,0.975))
-  N.Proc.ci = quantile(ysProc,c(0.025,0.5,0.975))
-  N.IC.ci = quantile(ysIC,c(0.025,0.5,0.975))
+  N.IP.ci = apply(ysParam,2,quantile,c(0.025,0.5,0.975))
+  N.Proc.ci = apply(ysProc,2,quantile,c(0.025,0.5,0.975))
+  N.IC.ci = apply(ysIC,2,quantile,c(0.025,0.5,0.975))
+  
   print(length(dtes))
   print(length(dataFinal$p[,years[s]]))
   print(length(N.IP.ci[1,]))
