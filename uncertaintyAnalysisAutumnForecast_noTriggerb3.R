@@ -51,6 +51,7 @@ forecastStep <- function(IC,b0,b1,b2,b3,Q=0,n,NT,Tair){
     syn <- b3 * Tair[t]
     
     xNew <- numeric()
+    mu <- bd+syn
     for(i in 1:length(bd)){
       #mu[i] <- max(0,min(mu[i],0.999))
       mu[i] <- bd + max(syn[i],0)
