@@ -104,7 +104,7 @@ for(s in 1:length(sites)){
   ecoforecastR::ciEnvelope(dtes,N.IP.ci[1,],N.IP.ci[3,],col=col.alpha("#fc8d62",0.5))
   ecoforecastR::ciEnvelope(dtes,N.IC.ci[1,],N.IC.ci[3,],col=col.alpha("#8da0cb",0.5))
   
-  lines(seq(1,length(dataFinal$p)),ysDet,col="black",lwd=3)
+  lines(seq(1,length(dataFinal$p[,years[s]])),ysDet,col="black",lwd=3)
 
 }
 dev.off()
