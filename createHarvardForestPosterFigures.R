@@ -106,7 +106,7 @@ for(s in 1:length(sites)){
 }
 plot(numeric(),numeric(),ylim=c(0,1),xlim=c(0,1))
 legend("topleft",col=c("black","black","#8da0cb","#fc8d62","#66c2a5"),
-       c("PhenoCam Observations","Mean Estimate","Initial Condition Error","Parameter Error",
-         "Process Error"),pch=c(20,15,15,15,15))
+       c("PhenoCam Observations","Mean Estimate","Initial Condition Uncertainty","Parameter Uncertainty",
+         "Process Uncertainty"),pch=c(20,15,15,15,15))
 dev.off()
 
