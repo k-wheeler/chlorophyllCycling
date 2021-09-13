@@ -66,7 +66,7 @@ prow = sample.int(nrow(out.mat),Nmc,replace=TRUE)
 
 sites <- c("harvard","bostoncommon","asuhighlands","bullshoals")
 years <- c(2,3,2,2)
-dtes <- seq(as.Date("2021-08-01"),as.Date("2021-12-31"))
+dtes <- seq(as.Date("2021-08-01"),as.Date("2021-12-31"),"day")
 
 pdf(file="UncertaintyAnalysis_HFposterFigures.pdf",height=6,width=10)
 for(s in 1:length(sites)){
