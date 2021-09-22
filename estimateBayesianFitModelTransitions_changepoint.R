@@ -149,8 +149,8 @@ foreach(f=1:length(sites)) %dopar% {
       j.model <- createChangepointModel_Fall(yobs=ysDet)
       #variables <- c("TranF","bF","prec","c")
       variables <- c("mS","mF","prec","mu[1]","k")
-      var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=10000,
-                                iterSize = 10000,sampleCutoff = 1000)
+      var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=50000,
+                                iterSize = 10000,sampleCutoff = 3000)
       #save(var.burn,file=paste0(siteName,"_"i,"ysDet_phenoCurve_varBurn.RData"))
       save(var.burn,file=paste0(siteName,"_",i,"_ysDet_changePointCurve_varBurn.RData"))
     }
