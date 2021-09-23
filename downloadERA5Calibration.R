@@ -32,7 +32,7 @@ foreach(i=1:nrow(siteData)) %dopar% {
   siteName <- as.character(siteData$siteName[i])
   print(siteName)
   outfolder <- paste("Data/",siteName,sep="")
-  # dir.create(outfolder)
+  dir.create(outfolder)
   # print(paste("Created Folder:",outfolder))
   lat <- as.numeric(siteData$Lat[i])
   long <- as.numeric(siteData$Long[i])
