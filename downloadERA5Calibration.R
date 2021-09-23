@@ -1,6 +1,6 @@
 library("reticulate")
 library(doParallel)
-n.cores <- 36
+n.cores <- 24
 
 #register the cores.
 registerDoParallel(cores=n.cores)
