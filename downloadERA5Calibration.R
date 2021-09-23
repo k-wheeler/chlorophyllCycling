@@ -32,14 +32,16 @@ foreach(i=1:nrow(siteData)) %dopar% {
   siteName <- as.character(siteData$siteName[i])
   print(siteName)
   outfolder <- paste("Data/",siteName,sep="")
-  dir.create(outfolder)
-  # print(paste("Created Folder:",outfolder))
+  if(!dir.exists((outfolder))){
+    dir.create(outfolder)
+    print(paste("Created Folder:",outfolder))
+  }
   lat <- as.numeric(siteData$Lat[i])
   long <- as.numeric(siteData$Long[i])
   start_date <- as.Date(siteData$startDate[i])
   
   area <- rep(round(c(lat, long) * 4) / 4, 2)
-
+  
   fname <- file.path(outfolder, paste(siteName,"_",start_date,"_",end_date,"_era5TemperatureMembers.nc", sep =""))
   #fname <- file.path(outfolder, paste(siteName,"_",start_date,"_",end_date,"_era5PrecipitationMembers.nc", sep =""))
   if(!file.exists(fname)){
