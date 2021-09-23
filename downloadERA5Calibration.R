@@ -6,8 +6,7 @@ n.cores <- 24
 registerDoParallel(cores=n.cores)
 setwd("/projectnb/dietzelab/kiwheel/ERA5")
 
-siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/
-                     allPhenocamDBsitesComplete.csv',header=TRUE)
+siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
 
 cdsapi <- reticulate::import("cdsapi")
 cclient <- cdsapi$Client()
