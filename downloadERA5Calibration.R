@@ -11,7 +11,7 @@ siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenoca
 cdsapi <- reticulate::import("cdsapi")
 cclient <- cdsapi$Client()
 
-end_date=as.Date("2020-12-31")
+#end_date=as.Date("2020-12-31")
 
 variables <- tibble::tribble(
   ~cf_name, ~units, ~api_name, ~ncdf_name,
@@ -39,6 +39,7 @@ foreach(i=1:nrow(siteData)) %dopar% {
   lat <- as.numeric(siteData$Lat[i])
   long <- as.numeric(siteData$Long[i])
   start_date <- as.Date(siteData$startDate[i])
+  end_date <- as.Date(siteData$endDate[i])
   
   area <- rep(round(c(lat, long) * 4) / 4, 2)
   
