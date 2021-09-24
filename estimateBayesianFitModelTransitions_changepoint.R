@@ -80,8 +80,8 @@ createChangepointModel_Fall <- function(yobs) {
   DB_model <- "
   model{
   ##priors
-  prec ~ dgamma(s1,s2)
-  mu[1] ~ dbeta(c.alp,c.bet)
+  #prec ~ dgamma(s1,s2)
+  y[1] ~ dbeta(c.alp,c.bet)
   mS ~ dunif(0,1)
   mF ~ dunif(0,1)
   k ~ dunif(0,100)
@@ -148,7 +148,7 @@ foreach(f=1:length(sites)) %dopar% {
       ysDet <- ysDet[ysDet>0.05]
       j.model <- createChangepointModel_Fall(yobs=ysDet)
       #variables <- c("TranF","bF","prec","c")
-      variables <- c("mS","mF","prec","mu[1]","k")
+      variables <- c("mS","mF","y[1]","k")
       var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=100000,
                                 iterSize = 20000,sampleCutoff = 2000)
       #save(var.burn,file=paste0(siteName,"_"i,"ysDet_phenoCurve_varBurn.RData"))
