@@ -87,10 +87,10 @@ createChangepointModel_Fall <- function(yobs) {
   k ~ dunif(0,100)
 
   for(i in 2:n){
-  muS[i] <- mu[(i-1)] - mS
-  muF[i] <- mu[(i-1)] - mF
-  mu[i] <- ifelse(x[i]>k,muF[i],muS[i])
-  y[i] ~ dnorm(mu[i],prec)
+  muS[i] <- y[(i-1)] - mS
+  muF[i] <- y[(i-1)] - mF
+  y[i] <- ifelse(x[i]>k,muF[i],muS[i])
+  #y[i] ~ dnorm(mu[i],prec)
   yobs[i] ~ dnorm(y[i],obs.prec)
   }
   }
@@ -149,8 +149,8 @@ foreach(f=1:length(sites)) %dopar% {
       j.model <- createChangepointModel_Fall(yobs=ysDet)
       #variables <- c("TranF","bF","prec","c")
       variables <- c("mS","mF","prec","mu[1]","k")
-      var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=50000,
-                                iterSize = 10000,sampleCutoff = 3000)
+      var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=100000,
+                                iterSize = 20000,sampleCutoff = 2000)
       #save(var.burn,file=paste0(siteName,"_"i,"ysDet_phenoCurve_varBurn.RData"))
       save(var.burn,file=paste0(siteName,"_",i,"_ysDet_changePointCurve_varBurn.RData"))
     }
