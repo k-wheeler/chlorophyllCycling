@@ -26,7 +26,7 @@ variables <- tibble::tribble(
 )
 
 var <- variables[["api_name"]][[1]]#4
-foreach(i=1:nrow(siteData)) %dopar% {
+foreach(i=75:nrow(siteData)) %dopar% {
   #for(i in 1:nrow(siteData)){
   #i <- 1
   siteName <- as.character(siteData$siteName[i])
