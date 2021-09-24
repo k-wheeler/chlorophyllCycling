@@ -4,7 +4,7 @@ library('ecoforecastR')
 library('PhenologyBayesModeling')
 library(doParallel)
 
-n.cores <- 4
+n.cores <- 16
 registerDoParallel(cores=n.cores)
 
 #Create forecast step model:
@@ -116,6 +116,7 @@ prow = sample.int(nrow(out.mat),Nmc,replace=TRUE)
 #files <- dir(pattern = "_b3_final_calibration_varBurn.RData")
 
 sites <- c("asuhighlands","bullshoals","macleish","harvard")
+sites <- as.character((read.csv("data/phenologyForecastSites.csv",header=TRUE))$siteName)
 
 minCt <- 1
 
@@ -139,7 +140,7 @@ foreach(f=1:length(sites)) %dopar% {
     initialXs <- out.mat.pred[prow.pred,1]
     days <- seq(1,NT)
     
-    for(i in 1:min(dataFinal$N,4)){
+    for(i in 1:min(dataFinal$N,5)){
       initialXs <- out.mat.pred[prow.pred,dataFinal$n*(i-1)+1]
       ysDet <- as.numeric(forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),
                                        b3=mean(b3),n=1,NT=length(days),Tair=dataFinal$TairMu[,i],
