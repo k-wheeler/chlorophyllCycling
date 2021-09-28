@@ -10,10 +10,16 @@ library(doParallel)
 library(ncdf4)
 source('load_ERA5.R')
 
+n.cores <- 8
+
+#register the cores.
+registerDoParallel(cores=n.cores)
+
 dataDirectory <- "data/"
 siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
 
-for(s in 1:nrow(siteData)){
+#for(s in 1:nrow(siteData)){
+foreach(s=1:nrow(siteData)) %dopar% {
   siteName <- as.character(siteData$siteName[s])
   lat <- as.numeric(siteData[s,2])
   long <- as.numeric(siteData[s,3])
