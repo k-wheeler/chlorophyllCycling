@@ -135,6 +135,6 @@ for(s in 1:nrow(siteData)){
   dataFinal$TairPrec <- TairPrec
   dataFinal$D <- D
   
-  save(dataFinal,file=paste(siteName,"_dataFinal.RData",sep=""))
+  save(dataFinal,file=paste0(dataDirectory,siteName,"_dataFinal.RData"))
   
 }
