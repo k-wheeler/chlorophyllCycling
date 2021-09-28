@@ -19,7 +19,7 @@ load_ERA5 <- function(ERA5dataFolder,calFileName,TZ_offset,variable) {
     
     ##Convert times to actual times
     times <- as.POSIXct(timeHours*3600, origin = "1900-01-01",tz = "GMT")
-    times <- times + TZ * 60 * 60 #(add number of offset hours in seconds)
+    times <- times + TZ_offset * 60 * 60 #(add number of offset hours in seconds)
     
     #Daily average
     allDates <- lubridate::date(times)
