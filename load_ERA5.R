@@ -30,6 +30,7 @@ load_ERA5 <- function(ERA5dataFolder,calFileName,TZ_offset,variable) {
       TairsDaily[,d] <- apply(subTairs,MARGIN=1,mean)
     }
     output <- TairsDaily
+    nc_close(ensembleFile)
   }
   return(output)
 }
