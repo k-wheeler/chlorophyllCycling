@@ -7,6 +7,7 @@ library(runjags)
 library(suncalc)
 library(rnoaa)
 library(doParallel)
+library(ncdf4)
 source('load_ERA5.R')
 
 dataDirectory <- "data/"
