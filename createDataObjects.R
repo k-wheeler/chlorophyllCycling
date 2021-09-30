@@ -21,6 +21,8 @@ siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenoca
 #for(s in 1:nrow(siteData)){
 foreach(s=1:nrow(siteData)) %dopar% {
   siteName <- as.character(siteData$siteName[s])
+  if(!file.exists(paste0(dataDirectory,siteName,"_dataFinal.RData"))){
+  print(siteName)
   lat <- as.numeric(siteData[s,2])
   long <- as.numeric(siteData[s,3])
   startDate <- (as.Date(siteData[s,7]))
@@ -100,9 +102,15 @@ foreach(s=1:nrow(siteData)) %dopar% {
   sofs <- numeric()
   for(i in (lubridate::year(as.Date(dat2$dates[1]))):lubridate::year(as.Date(dat2$dates[length(dat2$dates)]))){
     subDat <- dat2[lubridate::year(as.Date(dat2$dates))==i,]
-    valNum <- valNum + 1
-    Low <- fittedDat[valNum,'Low']
-    High <- fittedDat[valNum,'High']
+    #valNum <- valNum + 1
+    valNum <- which(fittedDat[,'Year']==i)
+    if(length(valNum)==0){
+      Low <- NA
+      High <- NA
+    }else{
+      Low <- fittedDat[valNum,'Low']
+      High <- fittedDat[valNum,'High']
+    }
     if(!is.na(Low)){
       newCol <- scales::rescale(subDat$p,to=c(0,1),from=c(Low,High))
       p <- cbind(p,newCol)
@@ -142,5 +150,5 @@ foreach(s=1:nrow(siteData)) %dopar% {
   dataFinal$D <- D
   
   save(dataFinal,file=paste0(dataDirectory,siteName,"_dataFinal.RData"))
-  
+  }
 }
