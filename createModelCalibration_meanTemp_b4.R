@@ -49,7 +49,7 @@ p.proc ~ dgamma(s1.proc,s2.proc)
 b0 ~ dunif(b0_lower,b0_upper)
 b1 ~ dunif(b1_lower,b1_upper)
 b2 ~ dunif(b2_lower,b2_upper)
-b ~ dunif(b4_lower,b4_upper)
+b4 ~ dunif(b4_lower,b4_upper)
 }
 "
 
