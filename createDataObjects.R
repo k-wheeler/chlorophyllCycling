@@ -70,11 +70,17 @@ for(s in 1:nrow(siteData)){
   dat2 <- data.frame(dates=days,years=years,months=months,p=p)
   calFileName <- paste0(siteName,"_",startDate,"_",endDate,"_era5TemperatureMembers.nc")
   datTairEns <- load_ERA5(ERA5dataFolder=ERA5dataFolder,calFileName=calFileName,TZ_offset=TZ,variable="Tair")
+  datTairEnsDay <- load_ERA5_daytime(ERA5dataFolder=ERA5dataFolder,calFileName=calFileName,TZ_offset=TZ,variable="Tair")
   
   TairMu <- apply(X=datTairEns,MARGIN=2,FUN=mean)
   TairPrec <- 1/apply(X=datTairEns,MARGIN=2,FUN=var)
   dat2$TairMu <- TairMu 
-  dat2$TairPrec<- TairPrec
+  dat2$TairPrec <- TairPrec
+  
+  TairMuDay <- apply(X=datTairEnsDay,MARGIN=2,FUN=mean)
+  TairPrecDay <- 1/apply(X=datTairEnsDay,MARGIN=2,FUN=var)
+  dat2$TairMuDay <- TairMuDay 
+  dat2$TairPrecDay <- TairPrecDay
   
   dayLengths <- numeric()
   
@@ -92,9 +98,11 @@ for(s in 1:nrow(siteData)){
   nrowNum <- 365-212
   p <- matrix(nrow=nrowNum,ncol=0)
   TairMu <- matrix(nrow=nrowNum,ncol=0)
+  TairMuDay <- matrix(nrow=nrowNum,ncol=0)
   D <- matrix(nrow=nrowNum,ncol=0)
   ICs <- matrix(nrow=10,ncol=0)
   TairPrec <- matrix(nrow=nrowNum,ncol=0)
+  TairPrecDay <- matrix(nrow=nrowNum,ncol=0)
   valNum <- 0
   days2 <- matrix(nrow=nrowNum,ncol=0)
   
@@ -119,8 +127,10 @@ for(s in 1:nrow(siteData)){
       finalYrs <- c(finalYrs,i)
       sofs <- c(sofs,(fittedDat[valNum,'FallStartDay']-212)) ######Change for start if needed
       TairMu <- cbind(TairMu,subDat$TairMu)
+      TairMuDay <- cbind(TairMuDay,subDat$TairMuDay)
       D <- cbind(D,subDat$D)
       TairPrec <- cbind(TairPrec,subDat$TairPrec)
+      TairPrecDay <- cbind(TairPrecDay,subDat$TairPrecDay)
     }
   }
   p[p<0] <- 0
@@ -147,6 +157,8 @@ for(s in 1:nrow(siteData)){
   
   dataFinal$TairMu <- TairMu
   dataFinal$TairPrec <- TairPrec
+  dataFinal$TairMuDay <- TairMuDay
+  dataFinal$TairPrecDay <- TairPrecDay
   dataFinal$D <- D
   
   save(dataFinal,file=paste0(dataDirectory,siteName,"_dataFinal.RData"))
