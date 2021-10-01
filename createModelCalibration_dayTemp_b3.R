@@ -66,6 +66,8 @@ foreach(s =1:length(sites)) %dopar% {
   dataFinal$TairMuDay <- dataFinal$TairMuDay[,-yearInt]
   dataFinal$TairPrecDay <- dataFinal$TairPrecDay[,-yearInt]
   dataFinal$D <- dataFinal$D[,-yearInt]
+  dataFinal$x1.a <- dataFinal$x1.a[-yearInt]
+  dataFinal$x1.b <- dataFinal$x1.b[-yearInt]
   dataFinal$N <- dataFinal$N - 1
   
   ##Add priors
