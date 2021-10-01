@@ -18,8 +18,8 @@ registerDoParallel(cores=n.cores)
 dataDirectory <- "data/"
 siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
 
-for(s in 1:nrow(siteData)){
-#foreach(s=1:nrow(siteData)) %dopar% {
+#for(s in 1:nrow(siteData)){
+foreach(s=1:nrow(siteData)) %dopar% {
   siteName <- as.character(siteData$siteName[s])
   if(!file.exists(paste0(dataDirectory,siteName,"_dataFinal.RData"))){
   print(siteName)
