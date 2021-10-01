@@ -70,7 +70,7 @@ for(s in 1:nrow(siteData)){
   dat2 <- data.frame(dates=days,years=years,months=months,p=p)
   calFileName <- paste0(siteName,"_",startDate,"_",endDate,"_era5TemperatureMembers.nc")
   datTairEns <- load_ERA5(ERA5dataFolder=ERA5dataFolder,calFileName=calFileName,TZ_offset=TZ,variable="Tair")
-  datTairEnsDay <- load_ERA5_daytime(ERA5dataFolder=ERA5dataFolder,calFileName=calFileName,TZ_offset=TZ,variable="Tair")
+  datTairEnsDay <- load_ERA5_daytime(ERA5dataFolder=ERA5dataFolder,calFileName=calFileName,TZ_offset=TZ,variable="Tair",lat=lat,long=long)
   
   TairMu <- apply(X=datTairEns,MARGIN=2,FUN=mean)
   TairPrec <- 1/apply(X=datTairEns,MARGIN=2,FUN=var)
