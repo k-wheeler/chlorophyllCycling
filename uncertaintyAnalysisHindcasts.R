@@ -107,25 +107,23 @@ uncertaintyAnalysisHindcast <- function(filePattern,pdfName,b,tID){
             b4 <- rep(0,length(b5))
           }
           
-          NT <- length(dataFinal$TairMu[,1])
-          
           Nmc <- 1000
           prow = sample.int(nrow(out.mat),Nmc,replace=TRUE)
-          
-          initialXs <- rbeta(prow,dataFinal$x1.a[1],dataFinal$x1.b[1])
-          
-          print(mean(initialXs))
-          
-          days <- seq(1,NT)
-          ysDet <- forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),b4=mean(b4),b5=mean(b5),
-                                n=1,NT=length(days),Tair=dataFinal$TairMu[,1],D=dataFinal$D[,1]) #Dependent on IC, but independent for >=1
-          ysParam <- forecastStep(IC=mean(initialXs),b0=b0[prow],b1=b1[prow],b2=b2[prow],b3=b3[prow],b4=b4[prow],b5=b5[prow],
-                                  n=Nmc,NT=NT,Tair=dataFinal$TairMu[,1],D=dataFinal$D[,1])
-          ysProc <- forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),b4=mean(b4),b5=mean(b5),
-                                 n=Nmc,NT=NT,Q=sqrt(1/out.mat$p.proc[prow]),Tair=dataFinal$TairMu[,1],D=dataFinal$D[,1])
-          ysIC <- forecastStep(IC=initialXs,b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),b4=mean(b4),b5=mean(b5),
-                               n=length(initialXs),NT=NT,Tair=dataFinal$TairMu[,1],D=dataFinal$D[,1])
           if(dataFinal$N>1){
+            NT <- length(dataFinal$TairMu[,1])
+            initialXs <- rbeta(prow,dataFinal$x1.a[1],dataFinal$x1.b[1])
+            
+            print(mean(initialXs))
+            
+            days <- seq(1,NT)
+            ysDet <- forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),b4=mean(b4),b5=mean(b5),
+                                  n=1,NT=length(days),Tair=dataFinal$TairMu[,1],D=dataFinal$D[,1]) #Dependent on IC, but independent for >=1
+            ysParam <- forecastStep(IC=mean(initialXs),b0=b0[prow],b1=b1[prow],b2=b2[prow],b3=b3[prow],b4=b4[prow],b5=b5[prow],
+                                    n=Nmc,NT=NT,Tair=dataFinal$TairMu[,1],D=dataFinal$D[,1])
+            ysProc <- forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),b4=mean(b4),b5=mean(b5),
+                                   n=Nmc,NT=NT,Q=sqrt(1/out.mat$p.proc[prow]),Tair=dataFinal$TairMu[,1],D=dataFinal$D[,1])
+            ysIC <- forecastStep(IC=initialXs,b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),b4=mean(b4),b5=mean(b5),
+                                 n=length(initialXs),NT=NT,Tair=dataFinal$TairMu[,1],D=dataFinal$D[,1])
             for(i in 2:dataFinal$N){
               initialXs <- rbeta(prow,dataFinal$x1.a[i],dataFinal$x1.b[i])
               
@@ -138,6 +136,21 @@ uncertaintyAnalysisHindcast <- function(filePattern,pdfName,b,tID){
               ysIC <- cbind(ysIC,forecastStep(IC=initialXs,b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),b4=mean(b4),b5=mean(b5),
                                               n=length(initialXs),NT=NT,Tair=dataFinal$TairMu[,i],D=dataFinal$D[,i]))
             }
+          }else{
+            NT <- length(dataFinal$TairMu)
+            initialXs <- rbeta(prow,dataFinal$x1.a,dataFinal$x1.b)
+            
+            print(mean(initialXs))
+            
+            days <- seq(1,NT)
+            ysDet <- forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),b4=mean(b4),b5=mean(b5),
+                                  n=1,NT=length(days),Tair=dataFinal$TairMu,D=dataFinal$D) #Dependent on IC, but independent for >=1
+            ysParam <- forecastStep(IC=mean(initialXs),b0=b0[prow],b1=b1[prow],b2=b2[prow],b3=b3[prow],b4=b4[prow],b5=b5[prow],
+                                    n=Nmc,NT=NT,Tair=dataFinal$TairMu,D=dataFinal$D)
+            ysProc <- forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),b4=mean(b4),b5=mean(b5),
+                                   n=Nmc,NT=NT,Q=sqrt(1/out.mat$p.proc[prow]),Tair=dataFinal$TairMu,D=dataFinal$D)
+            ysIC <- forecastStep(IC=initialXs,b0=mean(b0),b1=mean(b1),b2=mean(b2),b3=mean(b3),b4=mean(b4),b5=mean(b5),
+                                 n=length(initialXs),NT=NT,Tair=dataFinal$TairMu,D=dataFinal$D)
           }
           N.IP.ci = apply(ysParam,2,quantile,c(0.025,0.5,0.975))
           N.Proc.ci = apply(ysProc,2,quantile,c(0.025,0.5,0.975))
