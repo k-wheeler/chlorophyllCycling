@@ -140,7 +140,7 @@ uncertaintyAnalysisHindcast <- function(filePattern,pdfName,b,tID){
         N.Proc.ci = apply(ysProc,2,quantile,c(0.025,0.5,0.975))
         N.IC.ci = apply(ysIC,2,quantile,c(0.025,0.5,0.975))
         predictedValues <- list(ysDet=ysDet,N.IP.ci=N.IP.ci,N.Proc.ci=N.Proc.ci,N.IC.ci=N.IC.ci)
-        outFileName <- paste0(siteName,"_",calibrationSiteName,"_parameters_",tID,"_",b,"hindcasts.RData")
+        outFileName <- paste0("hindcasts/",siteName,"_",calibrationSiteName,"_parameters_",tID,"_",b,"_hindcasts.RData")
         save(file=outFileName,predictedValues)
       }
     }
