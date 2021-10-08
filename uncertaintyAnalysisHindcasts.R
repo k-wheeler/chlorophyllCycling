@@ -4,7 +4,7 @@ library('ecoforecastR')
 library('RColorBrewer')
 library(doParallel)
 
-n.cores <- 8
+n.cores <- 24
 
 #register the cores.
 registerDoParallel(cores=n.cores)
