@@ -24,14 +24,14 @@ generalModel = "
 model {
 ### Data Models for complete years
 for(yr in 1:(N)){
-for(i in 1:50){
+for(i in 1:n){
 p[i,yr] ~ dnorm(x[i,yr],p.PC)
 }
 }
 
 #### Process Model
 for(yr in 1:(N)){
-for(i in 2:50){
+for(i in 2:n){
 Tair[i,yr] ~ dnorm(TairMu[i,yr],TairPrec[i,yr])
 
 xmu[i,yr] <- max(min(x[(i-1),yr] + (b0 + (b1 * x[(i-1),yr]) + (b2 * x[(i-1),yr] ** 2)) + max(0,(b3 * TairMu[i,yr])),x[1,yr]),0)
@@ -58,7 +58,7 @@ foreach(s =1:length(sites)) %dopar% {
   print(siteName)
   yearRemoved <- yearsRemoved[s]
   load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
-  outputFileName <- paste0(siteName,"_meanTemp_summer50_b3_calibration_varBurn.RData")
+  outputFileName <- paste0(siteName,"_summer_meanTemp_b3_calibration_varBurn.RData")
   
   #Remove year
   yearInt <- which(dataFinal$years==yearRemoved)
@@ -83,6 +83,7 @@ foreach(s =1:length(sites)) %dopar% {
   dataFinal$b2_upper <- 0
   dataFinal$b3_lower <- 0
   dataFinal$b3_upper <- 1
+  dataFinal$n <- 46 ##Set for summer
   
   j.model   <- jags.model(file = textConnection(generalModel),
                           data = dataFinal,

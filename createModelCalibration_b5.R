@@ -57,7 +57,7 @@ foreach(s =1:length(sites)) %dopar% {
   print(siteName)
   yearRemoved <- yearsRemoved[s]
   load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
-  outputFileName <- paste0(siteName,"_b5_calibration_varBurn.RData")
+  outputFileName <- paste0(siteName,"_summer_b5_calibration_varBurn.RData")
   
   #Remove year
   yearInt <- which(dataFinal$years==yearRemoved)
@@ -82,6 +82,7 @@ foreach(s =1:length(sites)) %dopar% {
   dataFinal$b2_upper <- 0
   dataFinal$b5_lower <- 0
   dataFinal$b5_upper <- 1
+  dataFinal$n <- 46 #set for summer 
   
   j.model   <- jags.model(file = textConnection(generalModel),
                           data = dataFinal,
