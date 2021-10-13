@@ -86,10 +86,10 @@ foreach(s =1:length(sites)) %dopar% {
   j.model   <- jags.model(file = textConnection(generalModel),
                           data = dataFinal,
                           n.chains = nchain,
-                          n.adapt = 1500)
+                          n.adapt = 2000)
   
   out.burn <- runForecastIter(j.model=j.model,variableNames=variableNames,
-                              baseNum = 15000,iterSize = 5000,effSize = 5000,
+                              baseNum = 40000,iterSize = 10000,effSize = 5000,
                               partialFile = paste("partial_",outputFileName,sep=""))
 
   ##Thin the data:
