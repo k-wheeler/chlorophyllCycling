@@ -14,7 +14,7 @@ dataDirectory <- "data/"
 siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
 #siteData <- read.csv('allPhenocamDBsitesComplete.csv',header=TRUE)
 sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
-  "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033")
+           "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033")
 yearsRemoved <- c(2015,2010,2020,2015,2017,2015,2015,2010,2017,2019,2018,2017)
 nchain=5
 
@@ -59,49 +59,60 @@ foreach(s =1:length(sites)) %dopar% {
   yearRemoved <- yearsRemoved[s]
   load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
   outputFileName <- paste0(siteName,"_summer_dayTemp_b4_calibration_varBurn.RData")
-  
-  #Remove year
-  yearInt <- which(dataFinal$years==yearRemoved)
-  dataFinal$p <- dataFinal$p[,-yearInt]
-  dataFinal$TairMuDay <- dataFinal$TairMuDay[,-yearInt]
-  dataFinal$TairPrecDay <- dataFinal$TairPrecDay[,-yearInt]
-  dataFinal$D <- dataFinal$D[,-yearInt]
-  dataFinal$x1.a <- dataFinal$x1.a[-yearInt]
-  dataFinal$x1.b <- dataFinal$x1.b[-yearInt]
-  dataFinal$N <- dataFinal$N - 1
-  
-  ##Add priors
-  dataFinal$s1.PC <- 1.56
-  dataFinal$s2.PC <- 0.016
-  dataFinal$s1.proc <- 1.56
-  dataFinal$s2.proc <- 0.016
-  dataFinal$b0_lower <- -1
-  dataFinal$b0_upper <- 0
-  dataFinal$b1_lower <- -1
-  dataFinal$b1_upper <- 0
-  dataFinal$b2_lower <- -1
-  dataFinal$b2_upper <- 0
-  dataFinal$b4_lower <- 0
-  dataFinal$b4_upper <- 1
-  dataFinal$n <- 46 #set for summer 
-  
-  j.model   <- jags.model(file = textConnection(generalModel),
-                          data = dataFinal,
-                          n.chains = nchain,
-                          n.adapt = 1500)
-  
-  out.burn <- runForecastIter(j.model=j.model,variableNames=variableNames,
-                              baseNum = 15000,iterSize = 5000,effSize = 5000,
-                              partialFile = paste("partial_",outputFileName,sep=""))
-
-  ##Thin the data:
-  out.mat <- as.matrix(out.burn$params)
-  thinAmount <- round(nrow(out.mat)/5000,digits=0)
-  out.burn2 <- list()
-  out.burn2$params <- window(out.burn$params,thin=thinAmount)
-  out.burn2$predict <- window(out.burn$predict,thin=thinAmount)
-  out.burn <- out.burn2
-  save(out.burn,file = outputFileName)
+  if(!file.exists(outputFileName)){
+    #Remove year
+    yearInt <- which(dataFinal$years==yearRemoved)
+    dataFinal$p <- dataFinal$p[,-yearInt]
+    dataFinal$TairMuDay <- dataFinal$TairMuDay[,-yearInt]
+    dataFinal$TairPrecDay <- dataFinal$TairPrecDay[,-yearInt]
+    dataFinal$D <- dataFinal$D[,-yearInt]
+    dataFinal$x1.a <- dataFinal$x1.a[-yearInt]
+    dataFinal$x1.b <- dataFinal$x1.b[-yearInt]
+    dataFinal$N <- dataFinal$N - 1
+    
+    ##Add priors
+    dataFinal$s1.PC <- 1.56
+    dataFinal$s2.PC <- 0.016
+    dataFinal$s1.proc <- 1.56
+    dataFinal$s2.proc <- 0.016
+    dataFinal$b0_lower <- -1
+    dataFinal$b0_upper <- 0
+    dataFinal$b1_lower <- -1
+    dataFinal$b1_upper <- 0
+    dataFinal$b2_lower <- -1
+    dataFinal$b2_upper <- 0
+    dataFinal$b4_lower <- 0
+    dataFinal$b4_upper <- 1
+    dataFinal$n <- 46 #set for summer 
+    
+    inits <- list()
+    
+    for(i in 1:nchain){
+      inits[[i]] <- list(b0 = rnorm(1,-0.015,0.002),
+                         b1=rnorm(1,-0.012,0.002),
+                         b2=rnorm(1,-0.2,0.04),
+                         b4=rnorm(1,0.0004,0.00002))
+    }
+    
+    j.model   <- jags.model(file = textConnection(generalModel),
+                            data = dataFinal,
+                            n.chains = nchain,
+                            inits = inits,
+                            n.adapt = 1500)
+    
+    out.burn <- runForecastIter(j.model=j.model,variableNames=variableNames,
+                                baseNum = 15000,iterSize = 5000,effSize = 5000,
+                                partialFile = paste("partial_",outputFileName,sep=""))
+    
+    ##Thin the data:
+    out.mat <- as.matrix(out.burn$params)
+    thinAmount <- round(nrow(out.mat)/5000,digits=0)
+    out.burn2 <- list()
+    out.burn2$params <- window(out.burn$params,thin=thinAmount)
+    out.burn2$predict <- window(out.burn$predict,thin=thinAmount)
+    out.burn <- out.burn2
+    save(out.burn,file = outputFileName)
+  }
 }
 
 
