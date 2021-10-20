@@ -34,7 +34,7 @@ for(yr in 1:(N)){
 for(i in 2:n){
 Tair[i,yr] ~ dnorm(TairMu[i,yr],TairPrec[i,yr])
 
-xmu[i,yr] <- max(min(x[(i-1),yr] + (b0 + (b1 * x[(i-1),yr]) + (b2 * x[(i-1),yr] ** 2)) + (b3 * TairMu[i,yr])),x[1,yr],0)
+xmu[i,yr] <- max(min(x[(i-1),yr] + (b0 + (b1 * x[(i-1),yr]) + (b2 * x[(i-1),yr] ** 2)) + max(0,(b3 * TairMuDay[i,yr])),x[1,yr]),0)
 x[i,yr] ~ dnorm(xmu[i,yr],p.proc)
 }
 }
@@ -58,8 +58,8 @@ foreach(s =1:length(sites)) %dopar% {
   print(siteName)
   yearRemoved <- yearsRemoved[s]
   load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
-  #outputFileName <- paste0(siteName,"_summer_meanTemp_b3_lessConstrained_calibration_varBurn.RData")
-  outputFileName <- paste0(siteName,"_meanTemp_b3_lessConstrained_calibration_varBurn.RData")
+  outputFileName <- paste0(siteName,"_summer_meanTemp_b3_lessConstrained_synPos_calibration_varBurn.RData")
+  #outputFileName <- paste0(siteName,"_meanTemp_b3_lessConstrained_calibration_varBurn.RData")
   if(!file.exists(outputFileName)){
     #Remove year
     yearInt <- which(dataFinal$years==yearRemoved)
@@ -84,7 +84,7 @@ foreach(s =1:length(sites)) %dopar% {
     dataFinal$b2_upper <- 1#0
     dataFinal$b3_lower <- 0
     dataFinal$b3_upper <- 1
-    #dataFinal$n <- 46 ##Set for summer
+    dataFinal$n <- 46 ##Set for summer
     
     inits <- list()
     
