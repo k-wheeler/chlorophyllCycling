@@ -58,7 +58,8 @@ foreach(s =1:length(sites)) %dopar% {
   print(siteName)
   yearRemoved <- yearsRemoved[s]
   load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
-  outputFileName <- paste0(siteName,"_summer_meanTemp_b3_lessConstrained_calibration_varBurn.RData")
+  #outputFileName <- paste0(siteName,"_summer_meanTemp_b3_lessConstrained_calibration_varBurn.RData")
+  outputFileName <- paste0(siteName,"_meanTemp_b3_lessConstrained_calibration_varBurn.RData")
   if(!file.exists(outputFileName)){
     #Remove year
     yearInt <- which(dataFinal$years==yearRemoved)
@@ -83,7 +84,7 @@ foreach(s =1:length(sites)) %dopar% {
     dataFinal$b2_upper <- 1#0
     dataFinal$b3_lower <- 0
     dataFinal$b3_upper <- 1
-    dataFinal$n <- 46 ##Set for summer
+    #dataFinal$n <- 46 ##Set for summer
     
     inits <- list()
     
