@@ -34,7 +34,7 @@ for(yr in 1:(N)){
 for(i in 2:n){
 Tair[i,yr] ~ dnorm(TairMu[i,yr],TairPrec[i,yr])
 
-xmu[i,yr] <- max(min(x[(i-1),yr] + (b1 * x[(i-1),yr]) + max(0,(b0 + b3 * Tair[i,yr]+ (b4 * D[i,yr]) + (b5 * Tair[i,yr] * D[i,yr]))),x[1,yr]),0)
+xmu[i,yr] <- max(min(x[(i-1),yr] + (b1 * x[(i-1),yr]) + max(0,(b0 + b3 * Tair[i,yr]+ (b5 * D[i,yr]) + (b4 * Tair[i,yr] * D[i,yr]))),x[1,yr]),0)
 x[i,yr] ~ dnorm(xmu[i,yr],p.proc)
 }
 }
@@ -87,7 +87,7 @@ foreach(s =1:length(sites)) %dopar% {
     dataFinal$b3_upper <- 1
     dataFinal$b4_lower <- 0
     dataFinal$b4_upper <- 1
-    dataFinal$b5_lower <- -1
+    dataFinal$b5_lower <- 0
     dataFinal$b5_upper <- 1
     #dataFinal$n <- 46 ##Set for summer
     
