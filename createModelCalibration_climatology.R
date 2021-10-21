@@ -64,7 +64,7 @@ foreach(s =1:length(sites)) %dopar% {
                             n.adapt = 1500)
     
     out.burn <- runMCMC_Model(j.model=j.model,variableNames=variableNames,
-                                baseNum = 15000,iterSize = 5000,effSize = 5000)
+                                baseNum = 5000,iterSize = 2000)
     
     ##Thin the data:
     out.mat <- as.matrix(out.burn$params)
