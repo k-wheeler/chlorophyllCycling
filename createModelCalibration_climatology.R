@@ -67,11 +67,10 @@ foreach(s =1:length(sites)) %dopar% {
                                 baseNum = 5000,iterSize = 2000)
     
     ##Thin the data:
-    out.mat <- as.matrix(out.burn$params)
+    out.mat <- as.matrix(out.burn)
     thinAmount <- round(nrow(out.mat)/5000,digits=0)
     out.burn2 <- list()
-    out.burn2$params <- window(out.burn$params,thin=thinAmount)
-    out.burn2$predict <- window(out.burn$predict,thin=thinAmount)
+    out.burn2 <- window(out.burn,thin=thinAmount)
     out.burn <- out.burn2
     save(out.burn,file = outputFileName)
   }
