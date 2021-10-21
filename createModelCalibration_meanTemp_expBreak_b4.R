@@ -18,7 +18,7 @@ sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
 yearsRemoved <- c(2015,2010,2020,2015,2017,2015,2015,2010,2017,2019,2018,2017)
 nchain=5
 
-variableNames <- c("p.PC","x","b0","b1","b4","p.proc")
+variableNames <- c("p.PC","x","b1","b4","p.proc")
 
 generalModel = "
 model {
@@ -34,7 +34,7 @@ for(yr in 1:(N)){
 for(i in 2:n){
 Tair[i,yr] ~ dnorm(TairMu[i,yr],TairPrec[i,yr])
 
-xmu[i,yr] <- max(min(x[(i-1),yr] + (b1 * x[(i-1),yr]) + max(0,(b0 + (b4 * Tair[i,yr] * D[i,yr]))),x[1,yr]),0)
+xmu[i,yr] <- max(min(x[(i-1),yr] + (b1 * x[(i-1),yr]) + max(0,((b4 * Tair[i,yr] * D[i,yr]))),x[1,yr]),0)
 x[i,yr] ~ dnorm(xmu[i,yr],p.proc)
 }
 }
@@ -46,7 +46,7 @@ x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr])
 p.PC ~ dgamma(s1.PC,s2.PC)
 p.proc ~ dgamma(s1.proc,s2.proc)
 
-b0 ~ dunif(b0_lower,b0_upper)
+#b0 ~ dunif(b0_lower,b0_upper)
 b1 ~ dunif(b1_lower,b1_upper)
 #b3 ~ dunif(b3_lower,b3_upper)
 b4 ~ dunif(b4_lower,b4_upper)
@@ -59,8 +59,8 @@ foreach(s =1:length(sites)) %dopar% {
   print(siteName)
   yearRemoved <- yearsRemoved[s]
   load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
-  outputFileName <- paste0(siteName,"_summer_meanTemp_expBreak_b4_calibration_varBurn.RData")
-  #outputFileName <- paste0(siteName,"_meanTemp_expBreak_b4_calibration_varBurn.RData")
+  #outputFileName <- paste0(siteName,"_summer_meanTemp_expBreak_b4_calibration_varBurn.RData")
+  outputFileName <- paste0(siteName,"_meanTemp_expBreak_b4_calibration_varBurn.RData")
   if(!file.exists(outputFileName)){
     #Remove year
     yearInt <- which(dataFinal$years==yearRemoved)
@@ -89,7 +89,7 @@ foreach(s =1:length(sites)) %dopar% {
     dataFinal$b4_upper <- 1
     #dataFinal$b5_lower <- 0
     #dataFinal$b5_upper <- 1
-    dataFinal$n <- 46 ##Set for summer
+    #dataFinal$n <- 46 ##Set for summer
     
     # inits <- list()
     # 
