@@ -21,7 +21,7 @@ siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenoca
 #for(s in 1:nrow(siteData)){
 foreach(s=1:nrow(siteData)) %dopar% {
   siteName <- as.character(siteData$siteName[s])
-  if(!file.exists(paste0(dataDirectory,siteName,"_dataFinal.RData"))){
+  if(!file.exists(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))){
   print(siteName)
   lat <- as.numeric(siteData[s,2])
   long <- as.numeric(siteData[s,3])
@@ -92,10 +92,13 @@ foreach(s=1:nrow(siteData)) %dopar% {
   }
   
   dat2$D <- dayLengths
-  ICsdat <- dat2[as.numeric(format(dat2$dates,"%j"))%in% seq(203,212),]
-  dat2 <- dat2[as.numeric(format(dat2$dates,"%j"))%in% seq(213,365),]
+  #ICsdat <- dat2[as.numeric(format(dat2$dates,"%j"))%in% seq(203,212),] 
+  #dat2 <- dat2[as.numeric(format(dat2$dates,"%j"))%in% seq(213,365),] #Starting August 1st
+  ICsdat <- dat2[as.numeric(format(dat2$dates,"%j"))%in% seq(172,181),] 
+  dat2 <- dat2[as.numeric(format(dat2$dates,"%j"))%in% seq(182,365),] #Starting July 1st
   
-  nrowNum <- 365-212
+  #nrowNum <- 365-212
+  nrowNum <- 365-181
   p <- matrix(nrow=nrowNum,ncol=0)
   TairMu <- matrix(nrow=nrowNum,ncol=0)
   TairMuDay <- matrix(nrow=nrowNum,ncol=0)
@@ -120,17 +123,21 @@ foreach(s=1:nrow(siteData)) %dopar% {
       High <- fittedDat[valNum,'High']
     }
     if(!is.na(Low)){
+      newICs <- scales::rescale(ICsdat[lubridate::year(as.Date(ICsdat$dates))==i,]$p,from=c(Low,High))
+      if(length(na.omit(newICs))>5){
       newCol <- scales::rescale(subDat$p,to=c(0,1),from=c(Low,High))
       p <- cbind(p,newCol)
-      ICs <- cbind(ICs,scales::rescale(ICsdat[lubridate::year(as.Date(ICsdat$dates))==i,]$p,from=c(Low,High)))
+      ICs <- cbind(ICs,newICs)
       days2 <- cbind(days2,as.Date(subDat$dates))
       finalYrs <- c(finalYrs,i)
-      sofs <- c(sofs,(fittedDat[valNum,'FallStartDay']-212)) ######Change for start if needed
+      #sofs <- c(sofs,(fittedDat[valNum,'FallStartDay']-212))
+      sofs <- c(sofs,(fittedDat[valNum,'FallStartDay']-181)) ######Change for start if needed
       TairMu <- cbind(TairMu,subDat$TairMu)
       TairMuDay <- cbind(TairMuDay,subDat$TairMuDay)
       D <- cbind(D,subDat$D)
       TairPrec <- cbind(TairPrec,subDat$TairPrec)
       TairPrecDay <- cbind(TairPrecDay,subDat$TairPrecDay)
+      }
     }
   }
   p[p<0] <- 0
@@ -161,6 +168,6 @@ foreach(s=1:nrow(siteData)) %dopar% {
   dataFinal$TairPrecDay <- TairPrecDay
   dataFinal$D <- D
   
-  save(dataFinal,file=paste0(dataDirectory,siteName,"_dataFinal.RData"))
+  save(dataFinal,file=paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
   }
 }
