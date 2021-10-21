@@ -34,7 +34,7 @@ for(yr in 1:(N)){
 for(i in 2:n){
 Tair[i,yr] ~ dnorm(TairMu[i,yr],TairPrec[i,yr])
 
-xmu[i,yr] <- max(min(x[(i-1),yr] + (b1 * x[(i-1),yr]) + max(0,(b0 + b3 * TairMuDay[i,yr])),x[1,yr]),0)
+xmu[i,yr] <- max(min(x[(i-1),yr] + (b1 * x[(i-1),yr]) + max(0,(b0 + b3 * Tair[i,yr])),x[1,yr]),0)
 x[i,yr] ~ dnorm(xmu[i,yr],p.proc)
 }
 }
