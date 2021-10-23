@@ -153,21 +153,21 @@ model {
     
     if(summerOnly){
       if(dayOnly){
-        outputFileName <- paste0(siteName,"dayTemp_summer_expBreak_slope_",includeB,"_calibration_varBurn.RData")
-        initsFileName <- paste0(siteName,"dayTemp_summer_expBreak_slope_",includeB,"_calibration_inits.RData")
+        outputFileName <- paste0(siteName,"_dayTemp_summer_expBreak_slope_",includeB,"_calibration_varBurn.RData")
+        initsFileName <- paste0(siteName,"_dayTemp_summer_expBreak_slope_",includeB,"_calibration_inits.RData")
       }else{
-        outputFileName <- paste0(siteName,"meanTemp_summer_expBreak_slope_",includeB,"_calibration_varBurn.RData")
-        initsFileName <- paste0(siteName,"meanTemp_summer_expBreak_slope_",includeB,"_calibration_inits.RData")
+        outputFileName <- paste0(siteName,"_meanTemp_summer_expBreak_slope_",includeB,"_calibration_varBurn.RData")
+        initsFileName <- paste0(siteName,"_meanTemp_summer_expBreak_slope_",includeB,"_calibration_inits.RData")
       }
       dataFinal$n <- 77 #Limit days to July 1 through September 15th 
     }else{
       if(dayOnly){
-        outputFileName <- paste0(siteName,"dayTemp_fall_expBreak_slope_",includeB,"_calibration_varBurn.RData")
-        initsFileName <- paste0(siteName,"dayTemp_fall_expBreak_slope_",includeB,"_calibration_inits.RData")
+        outputFileName <- paste0(siteName,"_dayTemp_fall_expBreak_slope_",includeB,"_calibration_varBurn.RData")
+        initsFileName <- paste0(siteName,"_dayTemp_fall_expBreak_slope_",includeB,"_calibration_inits.RData")
         
       }else{
-        outputFileName <- paste0(siteName,"meanTemp_fall_expBreak_slope_",includeB,"_calibration_varBurn.RData")
-        initsFileName <- paste0(siteName,"meanTemp_fall_expBreak_slope_",includeB,"_calibration_inits.RData")
+        outputFileName <- paste0(siteName,"_meanTemp_fall_expBreak_slope_",includeB,"_calibration_varBurn.RData")
+        initsFileName <- paste0(siteName,"_meanTemp_fall_expBreak_slope_",includeB,"_calibration_inits.RData")
       }
     }
     
