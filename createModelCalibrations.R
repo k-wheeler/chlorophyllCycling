@@ -181,6 +181,8 @@ model {
       dataFinal$p <- dataFinal$p[,-yearInt]
       dataFinal$TairMu <- dataFinal$TairMu[,-yearInt]
       dataFinal$TairPrec <- dataFinal$TairPrec[,-yearInt]
+      dataFinal$TairMuDay <- dataFinal$TairMuDay[,-yearInt]
+      dataFinal$TairPrecDay <- dataFinal$TairPrecDay[,-yearInt]
       dataFinal$D <- dataFinal$D[,-yearInt]
       dataFinal$x1.a <- dataFinal$x1.a[-yearInt]
       dataFinal$x1.b <- dataFinal$x1.b[-yearInt]
