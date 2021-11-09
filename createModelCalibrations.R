@@ -7,8 +7,8 @@ library(suncalc)
 library(rnoaa)
 library(doParallel)
 
-createChlorophyllCyclingModelCalibration <- function(b0=c(-1,0),b1=c(0,0),b2=c(0,0),b3=c(0,0),b4=c(-1,0),summerOnly=FALSE,dayOnly=FALSE){
-  n.cores <- 12
+createChlorophyllCyclingModelCalibration <- function(b0=c(-1,0),b1=c(0,0),b2=c(0,0),b3=c(0,0),b4=c(-1,0),summerOnly=FALSE,dayOnly=FALSE,n=152){
+  n.cores <- 25
   registerDoParallel(cores=n.cores)
   
   dataDirectory <- "data/"
@@ -155,14 +155,22 @@ model {
     }
     
     if(summerOnly){
+      # if(dayOnly){
+      #   outputFileName <- paste0(siteName,"_dayTemp_summer_expBreak_slope_",includeB,"_calibration_varBurn.RData")
+      #   initsFileName <- paste0(siteName,"_dayTemp_summer_expBreak_slope_",includeB,"_calibration_inits.RData")
+      # }else{
+      #   outputFileName <- paste0(siteName,"_meanTemp_summer_expBreak_slope_",includeB,"_calibration_varBurn.RData")
+      #   initsFileName <- paste0(siteName,"_meanTemp_summer_expBreak_slope_",includeB,"_calibration_inits.RData")
+      # }
+      # dataFinal$n <- 77 #Limit days to July 1 through September 15th 
       if(dayOnly){
-        outputFileName <- paste0(siteName,"_dayTemp_summer_expBreak_slope_",includeB,"_calibration_varBurn.RData")
-        initsFileName <- paste0(siteName,"_dayTemp_summer_expBreak_slope_",includeB,"_calibration_inits.RData")
+        outputFileName <- paste0(siteName,"_dayTemp_summer",n,"_expBreak_slope_",includeB,"_calibration_varBurn.RData")
+        initsFileName <- paste0(siteName,"_dayTemp_summer",n,"_expBreak_slope_",includeB,"_calibration_inits.RData")
       }else{
-        outputFileName <- paste0(siteName,"_meanTemp_summer_expBreak_slope_",includeB,"_calibration_varBurn.RData")
-        initsFileName <- paste0(siteName,"_meanTemp_summer_expBreak_slope_",includeB,"_calibration_inits.RData")
+        outputFileName <- paste0(siteName,"_meanTemp_summer",n,"_expBreak_slope_",includeB,"_calibration_varBurn.RData")
+        initsFileName <- paste0(siteName,"_meanTemp_summer",n,"_expBreak_slope_",includeB,"_calibration_inits.RData")
       }
-      dataFinal$n <- 77 #Limit days to July 1 through September 15th 
+      dataFinal$n <- n #Limit days to July 1 through September 15th 
     }else{
       if(dayOnly){
         outputFileName <- paste0(siteName,"_dayTemp_fall_expBreak_slope_",includeB,"_calibration_varBurn.RData")
@@ -245,16 +253,20 @@ b4=c(0,0)
 #b1 (Temperature-constrained synthesis)
 #createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=FALSE,dayOnly=FALSE)
 #createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=FALSE,dayOnly=TRUE)
-createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE)
+#createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=84)
+#createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=77)#91
+#createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=98)
+#createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=105)
+#createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=126)#112,119
 #createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=TRUE)
 #b2 (Photoperiod-constrained synthesis)
-createChlorophyllCyclingModelCalibration(b2=c(0,1),summerOnly=FALSE,dayOnly=FALSE)
-createChlorophyllCyclingModelCalibration(b2=c(0,1),summerOnly=FALSE,dayOnly=TRUE)
-createChlorophyllCyclingModelCalibration(b2=c(0,1),summerOnly=TRUE,dayOnly=FALSE)
-createChlorophyllCyclingModelCalibration(b2=c(0,1),summerOnly=TRUE,dayOnly=TRUE)
+#createChlorophyllCyclingModelCalibration(b2=c(0,1),summerOnly=FALSE,dayOnly=FALSE)
+#createChlorophyllCyclingModelCalibration(b2=c(0,1),summerOnly=FALSE,dayOnly=TRUE)
+#createChlorophyllCyclingModelCalibration(b2=c(0,1),summerOnly=TRUE,dayOnly=FALSE)
+#createChlorophyllCyclingModelCalibration(b2=c(0,1),summerOnly=TRUE,dayOnly=TRUE)
 #b3 (Temperature and photoperiod-constrained synthesis )
-createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=FALSE,dayOnly=FALSE)
-createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=FALSE,dayOnly=TRUE)
-createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=TRUE,dayOnly=FALSE)
-createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=TRUE,dayOnly=TRUE)
+#createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=FALSE,dayOnly=FALSE)
+#createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=FALSE,dayOnly=TRUE)
+createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=112)
+#createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=TRUE,dayOnly=TRUE)
 
