@@ -59,7 +59,12 @@ foreach(s=1:nrow(siteData)) %dopar% {
   load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
 
   for(yr in 1:dataFinal$N){
-    p <- dataFinal$p[dataFinal$p[,yr]>0.15,yr]
+    #p <- dataFinal$p[dataFinal$p[,yr]>0.15,yr]
+    if(length(which(dataFinal$p[,yr]<0.10))>0){
+      p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.10)[1]-1),yr]
+    }else{
+      p <- dataFinal$p[,yr]
+    }
     yrName <- dataFinal$years[yr]
     j.model <- createChangepointModel_Fall(yobs=p)
     variables <- c("mS","mF","y[1]","k")
