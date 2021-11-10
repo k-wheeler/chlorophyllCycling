@@ -56,20 +56,24 @@ siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenoca
 foreach(s=1:nrow(siteData)) %dopar% {
   siteName <- as.character(siteData$siteName[s])
   print(siteName)
+  
   load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
-
+  
   for(yr in 1:dataFinal$N){
-    #p <- dataFinal$p[dataFinal$p[,yr]>0.15,yr]
-    if(length(which(dataFinal$p[,yr]<0.10))>0){
-      p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.10)[1]-1),yr]
-    }else{
-      p <- dataFinal$p[,yr]
-    }
     yrName <- dataFinal$years[yr]
-    j.model <- createChangepointModel_Fall(yobs=p)
-    variables <- c("mS","mF","y[1]","k")
-    var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
-                              iterSize = 10000,sampleCutoff = 5000)
-    save(var.burn,file=paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
+    if(!file.exists(paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))){
+      #p <- dataFinal$p[dataFinal$p[,yr]>0.15,yr]
+      if(length(which(dataFinal$p[,yr]<0.10))>0){
+        p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.10)[1]-1),yr]
+      }else{
+        p <- dataFinal$p[,yr]
+      }
+
+      j.model <- createChangepointModel_Fall(yobs=p)
+      variables <- c("mS","mF","y[1]","k")
+      var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
+                                iterSize = 10000,sampleCutoff = 5000)
+      save(var.burn,file=paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
+    }
   }
 }
