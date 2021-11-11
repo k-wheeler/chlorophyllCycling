@@ -59,7 +59,7 @@ foreach(s=1:nrow(siteData)) %dopar% {
   
   load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
   
-  for(yr in dataFinal$N:1){
+  for(yr in 1:dataFinal$N){
     yrName <- dataFinal$years[yr]
     if(!file.exists(paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))){
       #p <- dataFinal$p[dataFinal$p[,yr]>0.15,yr]
