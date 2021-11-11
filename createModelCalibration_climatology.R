@@ -14,8 +14,11 @@ dataDirectory <- "data/"
 siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
 #siteData <- read.csv('allPhenocamDBsitesComplete.csv',header=TRUE)
 sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
-           "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033")
-yearsRemoved <- c(2015,2010,2020,2015,2017,2015,2015,2010,2017,2019,2018,2017)
+           "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
+           "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","asa","canadaOA","alligatorriver","readingma",
+           "bullshoals","thompsonfarm2N","ashburnham","shalehillsczo")
+yearsRemoved <- c(2015,2010,2020,2015,2017,2015,2015,2010,2017,2019,2018,2017,
+                  2012,2019,2019,2010,2014,2012,2015,2017,2018,2016,2011,2012,2019)
 nchain=5
 
 variableNames <- c("p.PC","mu")
