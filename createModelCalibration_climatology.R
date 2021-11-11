@@ -7,7 +7,7 @@ library(suncalc)
 library(rnoaa)
 library(doParallel)
 
-n.cores <- 12
+n.cores <- 25
 registerDoParallel(cores=n.cores)
 
 dataDirectory <- "data/"
