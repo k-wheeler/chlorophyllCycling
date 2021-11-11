@@ -7,7 +7,7 @@ library(suncalc)
 library(rnoaa)
 library(doParallel)
 
-n.cores <- 12
+n.cores <- 25
 registerDoParallel(cores=n.cores)
 
 dataDirectory <- "data/"
@@ -52,7 +52,7 @@ foreach(s =1:length(sites)) %dopar% {
   siteName <- sites[s]
   print(siteName)
   yearRemoved <- yearsRemoved[s]
-  load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
+  load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
   #outputFileName <- paste0(siteName,"_summer_meanTemp_expBreak_b3_calibration_varBurn.RData")
   outputFileName <- paste0(siteName,"_randomWalk_calibration_varBurn.RData")
   if(!file.exists(outputFileName)){
