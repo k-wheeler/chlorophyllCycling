@@ -102,7 +102,7 @@ sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
            "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
            "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","asa","canadaOA","alligatorriver","readingma",
            "bullshoals","thompsonfarm2N","ashburnham","shalehillsczo")
-site <- 1
+site <- 2
 load(paste0(sites[site],'_meanTemp_fall_expBreak_slope_b3_calibration_varBurn.RData'))
 
 
