@@ -51,9 +51,9 @@ registerDoParallel(cores=n.cores)
 
 dataDirectory <- "data/"
 siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
-
-#for(s in 1:nrow(siteData)){
-foreach(s=1:nrow(siteData)) %dopar% {
+siteName <- "harvardblo"
+for(s in 35:nrow(siteData)){
+#foreach(s=1:nrow(siteData)) %dopar% {
   siteName <- as.character(siteData$siteName[s])
   print(siteName)
   

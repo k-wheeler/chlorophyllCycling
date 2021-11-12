@@ -15,10 +15,10 @@ siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenoca
 #siteData <- read.csv('allPhenocamDBsitesComplete.csv',header=TRUE)
 sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
            "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
-           "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","asa","canadaOA","alligatorriver","readingma",
+           "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","canadaOA","alligatorriver","readingma",
            "bullshoals","thompsonfarm2N","ashburnham","shalehillsczo")
 yearsRemoved <- c(2015,2010,2020,2015,2017,2015,2015,2010,2017,2019,2018,2017,
-                  2012,2019,2019,2010,2014,2012,2015,2017,2018,2016,2011,2012,2019)
+                  2012,2019,2019,2010,2014,2015,2017,2018,2016,2011,2012,2019)
 nchain=5
 
 variableNames <- c("p.PC","x","p.proc")
@@ -41,14 +41,15 @@ x[i,yr] ~ dnorm(x[(i-1),yr],p.proc)
 
 #### Priors
 for(yr in 1:N){ ##Initial Conditions
-x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr])
+x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr]) I(0.001,0.999)
 }
 p.PC ~ dgamma(s1.PC,s2.PC)
 p.proc ~ dgamma(s1.proc,s2.proc)
 }
 "
 
-foreach(s =1:length(sites)) %dopar% {
+#foreach(s =1:length(sites)) %dopar% {
+for(s in 3:length(sites)){
   siteName <- sites[s]
   print(siteName)
   yearRemoved <- yearsRemoved[s]
@@ -61,6 +62,8 @@ foreach(s =1:length(sites)) %dopar% {
     dataFinal$p <- dataFinal$p[,-yearInt]
     dataFinal$TairMu <- dataFinal$TairMu[,-yearInt]
     dataFinal$TairPrec <- dataFinal$TairPrec[,-yearInt]
+    dataFinal$TairMuDay <- dataFinal$TairMuDay[,-yearInt]
+    dataFinal$TairPrecDay <- dataFinal$TairPrecDay[,-yearInt]
     dataFinal$D <- dataFinal$D[,-yearInt]
     dataFinal$x1.a <- dataFinal$x1.a[-yearInt]
     dataFinal$x1.b <- dataFinal$x1.b[-yearInt]
