@@ -107,8 +107,8 @@ sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
 yearsRemoved <- c(2015,2010,2020,2015,2017,2015,2015,2010,2017,2019,2018,2017,
                   2012,2019,2019,2010,2014,2015,2017,2018,2016,2011,2012,2019)
 Nmc <- 1000
-#foreach(s=1:length(sites)) %dopar% {
-for(s in 1:length(sites)){
+foreach(s=1:length(sites)) %dopar% {
+#for(s in 1:length(sites)){
   siteName <- sites[s]
   print(siteName)
   
