@@ -98,13 +98,12 @@ createChangepointModel_Fall <- function(yobs) {
                           n.chains = nchain)
   return(j.model)
 }
-sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
+runSites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
            "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
            "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","asa","canadaOA","alligatorriver","readingma",
            "bullshoals","thompsonfarm2N","ashburnham","shalehillsczo")
-site <- 2
-load(paste0(sites[site],'_meanTemp_fall_expBreak_slope_b3_calibration_varBurn.RData'))
-
+site <- 3
+load(paste0(runSites[site],'_meanTemp_fall_expBreak_slope_b3_calibration_varBurn.RData'))
 
 Nmc <- 1000
 out.mat <- data.frame(as.matrix(out.burn$param))
@@ -144,7 +143,7 @@ foreach(s=1:length(sites)) %dopar% {
     #initialXs <- rbeta(prow,dataFinal$x1.a[1],dataFinal$x1.b[1])
     days <- seq(1,NT)
     
-    for(i in 1:min(dataFinal$N,5)){
+    for(i in 1:dataFinal$N){
       initialXs <- rbeta(prow,dataFinal$x1.a[i],dataFinal$x1.b[i])
       ysDet <- as.numeric(forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),
                                        b3=mean(b3),b4=mean(b4),n=1,NT=length(days),Tair=dataFinal$TairMu[,i],
@@ -156,7 +155,7 @@ foreach(s=1:length(sites)) %dopar% {
       variables <- c("mS","mF","y[1]","k")
       var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
                                 iterSize = 10000,sampleCutoff = 2000)
-      save(var.burn,file=paste0(siteName,"_",i,"_ysDet_changePointCurve_",sites[site],"_meanTemp_fall_b1_varBurn.RData"))
+      save(var.burn,file=paste0(siteName,"_",i,"_ysDet_changePointCurve_",runSites[site],"_meanTemp_fall_b1_varBurn.RData"))
     }
   }
 }
