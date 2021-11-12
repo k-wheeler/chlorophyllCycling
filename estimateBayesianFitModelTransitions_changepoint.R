@@ -4,7 +4,7 @@ library('ecoforecastR')
 library('PhenologyBayesModeling')
 library(doParallel)
 
-n.cores <- 16
+n.cores <- 25
 registerDoParallel(cores=n.cores)
 
 #Create forecast step model:
@@ -27,7 +27,7 @@ registerDoParallel(cores=n.cores)
 #' @export
 #'
 #' @examples
-forecastStep <- function(IC,b0,b1,b2,b3,Q=0,n,NT,Tair,D){
+forecastStep <- function(IC,b0,b1,b2,b3,b4,Q=0,n,NT,Tair,D){
   x <- matrix(NA,n,NT)
   if(length(IC)==1){
     Xprev <- rep(IC,n)
@@ -36,16 +36,14 @@ forecastStep <- function(IC,b0,b1,b2,b3,Q=0,n,NT,Tair,D){
   }
   
   for(t in 1:NT){
-    bd <- Xprev + b0 + (b1 * Xprev) + (b2 * Xprev **2) 
-    syn <- b3 * Tair[t]
+    bd <- Xprev + b4 * Xprev #b0 + (b1 * Xprev) + (b2 * Xprev **2) 
+    syn <- b0 + b1 * Tair[t] + b2 * D[t] + b3 * Tair[t] * D[t] 
     if(length(syn)==1){
       syn <- rep(syn,n)
     }
-    
     xNew <- numeric()
     mu <- rep(NA,n)
     for(i in 1:n){
-      #mu[i] <- max(0,min(mu[i],0.999))
       mu[i] <- bd[i] + max(syn[i],0)
       mu[i] <- max(0,min(mu[i],IC[min(i,length(IC))]))
       
@@ -54,7 +52,6 @@ forecastStep <- function(IC,b0,b1,b2,b3,Q=0,n,NT,Tair,D){
       }else{
         xNew <- c(xNew,rnorm(1,mu[i],Q))
       }
-      #xNew <- c(xNew,max(0, min(0.99,xl)))
     }
     x[,t] <- xNew ## trunate normal process error
     Xprev <- x[,t]
@@ -102,58 +99,60 @@ createChangepointModel_Fall <- function(yobs) {
   return(j.model)
 }
 
-load('harvard_b3_final_calibration_varBurn.RData')
+load('harvard_meanTemp_fall_expBreak_slope_b3_calibration_varBurn.RData')
+
 
 Nmc <- 1000
 out.mat <- data.frame(as.matrix(out.burn$param))
-
+b <- "b3"
 b0 <- out.mat$b0
-b1 <- out.mat$b1
-b2 <- out.mat$b2
-b3 <- out.mat$b3
+b4 <- out.mat$b4
+if(b=="b1"){
+  b1 <- out.mat$b1
+  b2 <- rep(0,length(b1))
+  b3 <- rep(0,length(b1))
+}else if(b=="b2"){
+  b2 <- out.mat$b2
+  b1 <- rep(0,length(b2))
+  b3 <- rep(0,length(b2))
+}else if(b=="b3"){
+  b3 <- out.mat$b3
+  b1 <- rep(0,length(b3))
+  b2 <- rep(0,length(b3))
+}
 prow = sample.int(nrow(out.mat),Nmc,replace=TRUE)
 
-#files <- dir(pattern = "_b3_final_calibration_varBurn.RData")
+siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
 
-sites <- c("asuhighlands","bullshoals","macleish","harvard")
-sites <- as.character((read.csv("data/phenologyForecastSites.csv",header=TRUE))$siteName)
-
-minCt <- 1
+sites <- as.character(siteData$siteName)
+dataDirectory <- "data/"
 
 #for(f in 1:length(sites)){
-foreach(f=1:length(sites)) %dopar% {
-  fileName <- paste0(sites[f],"_b3_final_calibration_varBurn.RData")
-  print(fileName)
-  tle <- strsplit(fileName,"_")[[1]][1:2]
-  siteName <- strsplit(fileName,"_")[[1]][1]
+foreach(s=1:length(sites)) %dopar% {
+  siteName <- sites[s]
+  print(siteName)
   
-  baseTempOrig <- 20
-  load(fileName)
-  load(paste(siteName,"_CDD",baseTempOrig,"_dataFinal.RData",sep=""))
+  load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData")) #Load Data
   
   if(ncol(dataFinal$TairMu)>1){
-    out.mat <- data.frame(as.matrix(out.burn$param))
     NT <- length(dataFinal$TairMu[,1])
-    out.mat.pred <- data.frame(as.matrix(out.burn$predict))
-    
-    prow.pred = sample.int(nrow(out.mat),Nmc,replace=TRUE)
-    initialXs <- out.mat.pred[prow.pred,1]
+
+    #initialXs <- rbeta(prow,dataFinal$x1.a[1],dataFinal$x1.b[1])
     days <- seq(1,NT)
     
     for(i in 1:min(dataFinal$N,5)){
-      initialXs <- out.mat.pred[prow.pred,dataFinal$n*(i-1)+1]
+      initialXs <- rbeta(prow,dataFinal$x1.a[i],dataFinal$x1.b[i])
       ysDet <- as.numeric(forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),
-                                       b3=mean(b3),n=1,NT=length(days),Tair=dataFinal$TairMu[,i],
-                                       D=dataFinal$D[,1]))
-      #j.model <- createBayesModel_Fall(yobs=ysDet)
-      ysDet <- ysDet[ysDet>0.05]
+                                       b3=mean(b3),b4=mean(b4),n=1,NT=length(days),Tair=dataFinal$TairMu[,i],
+                                       D=dataFinal$D[,i]))
+      if(length(which(ysDet<0.10))>0){
+        ysDet <- ysDet[1:(which(ysDet<0.10)[1]-1)]
+      }
       j.model <- createChangepointModel_Fall(yobs=ysDet)
-      #variables <- c("TranF","bF","prec","c")
       variables <- c("mS","mF","y[1]","k")
       var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
                                 iterSize = 10000,sampleCutoff = 2000)
-      #save(var.burn,file=paste0(siteName,"_"i,"ysDet_phenoCurve_varBurn.RData"))
-      save(var.burn,file=paste0(siteName,"_",i,"_ysDet_changePointCurve_varBurn.RData"))
+      save(var.burn,file=paste0(siteName,"_",i,"_ysDet_changePointCurve_harvard_meanTemp_fall_b1_varBurn.RData"))
     }
   }
 }
