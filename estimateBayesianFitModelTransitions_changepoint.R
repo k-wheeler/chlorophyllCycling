@@ -98,8 +98,12 @@ createChangepointModel_Fall <- function(yobs) {
                           n.chains = nchain)
   return(j.model)
 }
-
-load('harvard_meanTemp_fall_expBreak_slope_b3_calibration_varBurn.RData')
+sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
+           "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
+           "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","asa","canadaOA","alligatorriver","readingma",
+           "bullshoals","thompsonfarm2N","ashburnham","shalehillsczo")
+site <- 1
+load(paste0(sites[site],'_meanTemp_fall_expBreak_slope_b3_calibration_varBurn.RData'))
 
 
 Nmc <- 1000
@@ -152,7 +156,7 @@ foreach(s=1:length(sites)) %dopar% {
       variables <- c("mS","mF","y[1]","k")
       var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
                                 iterSize = 10000,sampleCutoff = 2000)
-      save(var.burn,file=paste0(siteName,"_",i,"_ysDet_changePointCurve_harvard_meanTemp_fall_b1_varBurn.RData"))
+      save(var.burn,file=paste0(siteName,"_",i,"_ysDet_changePointCurve_",sites[site],"_meanTemp_fall_b1_varBurn.RData"))
     }
   }
 }
