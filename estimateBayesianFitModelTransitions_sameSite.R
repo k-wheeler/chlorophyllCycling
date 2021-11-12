@@ -101,14 +101,14 @@ createChangepointModel_Fall <- function(yobs) {
 dataDirectory <- "data/"
 
 sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
-              "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
-              "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","asa","canadaOA","alligatorriver","readingma",
-              "bullshoals","thompsonfarm2N","ashburnham","shalehillsczo")
+           "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
+           "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","asa","canadaOA","alligatorriver","readingma",
+           "bullshoals","thompsonfarm2N","ashburnham","shalehillsczo")
 yearsRemoved <- c(2015,2010,2020,2015,2017,2015,2015,2010,2017,2019,2018,2017,
                   2012,2019,2019,2010,2014,2015,2017,2018,2016,2011,2012,2019)
 Nmc <- 1000
 foreach(s=1:length(sites)) %dopar% {
-#for(s in 1:length(sites)){
+  #for(s in 1:length(sites)){
   siteName <- sites[s]
   print(siteName)
   
@@ -140,19 +140,20 @@ foreach(s=1:length(sites)) %dopar% {
     days <- seq(1,NT)
     
     for(i in 1:dataFinal$N){
-      if(!file.exists(paste0(siteName,"_",dataFinal$years[i],"_ysDet_changePointCurve_",sites[s],"_meanTemp_fall_b1_varBurn.RData")))
+      if(!file.exists(paste0(siteName,"_",dataFinal$years[i],"_ysDet_changePointCurve_",sites[s],"_meanTemp_fall_b1_varBurn.RData"))){
         initialXs <- rbeta(prow,dataFinal$x1.a[i],dataFinal$x1.b[i])
-      ysDet <- as.numeric(forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),
-                                       b3=mean(b3),b4=mean(b4),n=1,NT=length(days),Tair=dataFinal$TairMu[,i],
-                                       D=dataFinal$D[,i]))
-      if(length(which(ysDet<0.10))>0){
-        ysDet <- ysDet[1:(which(ysDet<0.10)[1]-1)]
+        ysDet <- as.numeric(forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),
+                                         b3=mean(b3),b4=mean(b4),n=1,NT=length(days),Tair=dataFinal$TairMu[,i],
+                                         D=dataFinal$D[,i]))
+        if(length(which(ysDet<0.10))>0){
+          ysDet <- ysDet[1:(which(ysDet<0.10)[1]-1)]
+        }
+        j.model <- createChangepointModel_Fall(yobs=ysDet)
+        variables <- c("mS","mF","y[1]","k")
+        var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
+                                  iterSize = 10000,sampleCutoff = 2000)
+        save(var.burn,file=paste0(siteName,"_",dataFinal$years[i],"_ysDet_changePointCurve_",sites[s],"_meanTemp_fall_b1_varBurn.RData"))
       }
-      j.model <- createChangepointModel_Fall(yobs=ysDet)
-      variables <- c("mS","mF","y[1]","k")
-      var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
-                                iterSize = 10000,sampleCutoff = 2000)
-      save(var.burn,file=paste0(siteName,"_",dataFinal$years[i],"_ysDet_changePointCurve_",sites[s],"_meanTemp_fall_b1_varBurn.RData"))
     }
   }
 }
