@@ -144,6 +144,7 @@ foreach(s=1:length(sites)) %dopar% {
     days <- seq(1,NT)
     
     for(i in 1:dataFinal$N){
+      if(!file.exists(paste0(siteName,"_",dataFinal$years[i],"_ysDet_changePointCurve_",runSites[site],"_meanTemp_fall_b1_varBurn.RData")))
       initialXs <- rbeta(prow,dataFinal$x1.a[i],dataFinal$x1.b[i])
       ysDet <- as.numeric(forecastStep(IC=mean(initialXs),b0=mean(b0),b1=mean(b1),b2=mean(b2),
                                        b3=mean(b3),b4=mean(b4),n=1,NT=length(days),Tair=dataFinal$TairMu[,i],
@@ -155,7 +156,7 @@ foreach(s=1:length(sites)) %dopar% {
       variables <- c("mS","mF","y[1]","k")
       var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
                                 iterSize = 10000,sampleCutoff = 2000)
-      save(var.burn,file=paste0(siteName,"_",i,"_ysDet_changePointCurve_",runSites[site],"_meanTemp_fall_b1_varBurn.RData"))
+      save(var.burn,file=paste0(siteName,"_",dataFinal$years[i],"_ysDet_changePointCurve_",runSites[site],"_meanTemp_fall_b1_varBurn.RData"))
     }
   }
 }
