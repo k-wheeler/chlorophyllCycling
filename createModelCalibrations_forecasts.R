@@ -116,8 +116,19 @@ model {
     }else if(b3[1]!=0 | b3[2]!=0){
       includeB <- "b3"
       variableNames <- c(variableNames,"b3")
-      for(i in 1:nchain){
-        inits[[i]]$b3 <- runif(1,b3[1],b3[2])
+      inputFileName <- paste0(siteName,"_meanTemp_summer",n,"_expBreak_slope_",includeB,"_calibration_varBurn.RData")
+      if(file.exists(inputFileName)){
+        load(inputFileName) #Load Model Output 
+        out.mat <- data.frame(as.matrix(out.burn$param))
+        for(i in 1:nchain){
+          inits[[i]]$b0 <- rnorm(1,mean(out.mat$b0),sd(out.mat$b0))
+          inits[[i]]$b3 <- rnorm(1,mean(out.mat$b3),sd(out.mat$b3))
+          inits[[i]]$b4 <- rnorm(1,mean(out.mat$b4),sd(out.mat$b4))
+        }
+      }else{
+        for(i in 1:nchain){
+          inits[[i]]$b3 <- runif(1,b3[1],b3[2])
+        }
       }
       generalModel = "
 model {
@@ -150,9 +161,7 @@ model {
     b4 ~ dunif(b4_lower,b4_upper)
     
   }
-    "
-      
-    }
+    "}
     
     if(summerOnly){
       if(dayOnly){
