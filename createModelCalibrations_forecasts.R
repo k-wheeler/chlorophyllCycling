@@ -8,7 +8,7 @@ library(rnoaa)
 library(doParallel)
 
 createChlorophyllCyclingModelCalibration <- function(b0=c(-1,0),b1=c(0,0),b2=c(0,0),b3=c(0,0),b4=c(-1,0),summerOnly=FALSE,dayOnly=FALSE,n=183){
-  n.cores <- 12
+  n.cores <- 24
   registerDoParallel(cores=n.cores)
   
   dataDirectory <- "data/"
