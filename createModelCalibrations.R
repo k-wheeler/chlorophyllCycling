@@ -7,7 +7,7 @@ library(suncalc)
 library(rnoaa)
 library(doParallel)
 
-createChlorophyllCyclingModelCalibration <- function(b0=c(-1,0),b1=c(0,0),b2=c(0,0),b3=c(0,0),b4=c(-1,0),summerOnly=FALSE,dayOnly=FALSE,n=152){
+createChlorophyllCyclingModelCalibration <- function(b0=c(-1,0),b1=c(0,0),b2=c(0,0),b3=c(0,0),b4=c(-1,0),summerOnly=FALSE,dayOnly=FALSE,n=183){
   n.cores <- 12
   registerDoParallel(cores=n.cores)
   
@@ -63,7 +63,7 @@ createChlorophyllCyclingModelCalibration <- function(b0=c(-1,0),b1=c(0,0),b2=c(0
     
     #### Priors
     for(yr in 1:N){ ##Initial Conditions
-    x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr])
+    x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr]) I(0.001,0.999)
     }
     p.PC ~ dgamma(s1.PC,s2.PC)
     p.proc ~ dgamma(s1.proc,s2.proc)
@@ -101,7 +101,7 @@ model {
     
     #### Priors
     for(yr in 1:N){ ##Initial Conditions
-    x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr])
+    x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr]) I(0.001,0.999)
     }
     p.PC ~ dgamma(s1.PC,s2.PC)
     p.proc ~ dgamma(s1.proc,s2.proc)
@@ -140,7 +140,7 @@ model {
     
     #### Priors
     for(yr in 1:N){ ##Initial Conditions
-    x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr])
+    x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr]) I(0.001,0.999)
     }
     p.PC ~ dgamma(s1.PC,s2.PC)
     p.proc ~ dgamma(s1.proc,s2.proc)
@@ -253,11 +253,11 @@ b4=c(0,0)
 #b1 (Temperature-constrained synthesis)
 #createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=FALSE,dayOnly=FALSE)
 #createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=FALSE,dayOnly=TRUE)
-createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=84)
-createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=91)
-createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=98)
-createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=105)
-createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=112)
+#createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=84)
+#createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=91)
+#createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=98)
+#createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=105)
+#createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=112)
 #createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=TRUE)
 #b2 (Photoperiod-constrained synthesis)
 #createChlorophyllCyclingModelCalibration(b2=c(0,1),summerOnly=FALSE,dayOnly=FALSE)
@@ -267,6 +267,6 @@ createChlorophyllCyclingModelCalibration(b1=c(0,1),summerOnly=TRUE,dayOnly=FALSE
 #b3 (Temperature and photoperiod-constrained synthesis )
 #createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=FALSE,dayOnly=FALSE)
 #createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=FALSE,dayOnly=TRUE)
-#createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=TRUE,dayOnly=FALSE)
+createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=TRUE,dayOnly=FALSE,n=77)
 #createChlorophyllCyclingModelCalibration(b3=c(0,1),summerOnly=TRUE,dayOnly=TRUE)
 
