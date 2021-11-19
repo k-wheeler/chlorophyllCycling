@@ -121,9 +121,9 @@ model {
         load(inputFileName) #Load Model Output 
         out.mat <- data.frame(as.matrix(out.burn$param))
         for(i in 1:nchain){
-          inits[[i]]$b0 <- rnorm(1,mean(out.mat$b0),sd(out.mat$b0))
-          inits[[i]]$b3 <- rnorm(1,mean(out.mat$b3),sd(out.mat$b3))
-          inits[[i]]$b4 <- rnorm(1,mean(out.mat$b4),sd(out.mat$b4))
+          inits[[i]]$b0 <- min(rnorm(1,mean(out.mat$b0),sd(out.mat$b0)),-0.001)
+          inits[[i]]$b3 <- max(rnorm(1,mean(out.mat$b3),sd(out.mat$b3)),0.001)
+          inits[[i]]$b4 <- min(rnorm(1,mean(out.mat$b4),sd(out.mat$b4)),-0.001)
         }
       }else{
         for(i in 1:nchain){
