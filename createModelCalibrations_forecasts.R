@@ -31,8 +31,8 @@ createChlorophyllCyclingModelCalibration <- function(b0=c(-1,0),b1=c(0,0),b2=c(0
     variableNames <- c("p.PC","x","p.proc","b0","b4")
     inits <- list()
     for(i in 1:nchain){
-      inits[[i]] <- list(b0 = runif(1,b0[1],b0[2]),
-                         b4 = runif(1,b4[1],b4[2]),
+      inits[[i]] <- list(b0 = min(runif(1,b0[1],b0[2]),-0.001),
+                         b4 = min(runif(1,b4[1],b4[2]),-0.001),
                          p.PC = rgamma(1,1.56,0.016),
                          p.proc = rgamma(1,1.56,0.016))
     }
@@ -156,7 +156,7 @@ model {
     p.PC ~ dgamma(s1.PC,s2.PC)
     p.proc ~ dgamma(s1.proc,s2.proc)
     
-    b0 ~ dunif(b0_lower,b0_upper)
+    b0 ~ dunif(b0_lower,b0_upper) I(-0.9999,-0.0001)
     b3 ~ dunif(b3_lower,b3_upper)
     b4 ~ dunif(b4_lower,b4_upper)
     
