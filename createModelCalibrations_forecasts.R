@@ -156,7 +156,7 @@ model {
     p.PC ~ dgamma(s1.PC,s2.PC)
     p.proc ~ dgamma(s1.proc,s2.proc)
     
-    b0 ~ dunif(b0_lower,b0_upper) I(-0.9999,-0.0001)
+    b0 ~ dunif(b0_lower,b0_upper)
     b3 ~ dunif(b3_lower,b3_upper)
     b4 ~ dunif(b4_lower,b4_upper)
     
