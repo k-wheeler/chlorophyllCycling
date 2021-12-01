@@ -55,19 +55,20 @@ for(s in 3:length(sites)){
   yearRemoved <- yearsRemoved[s]
   load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
   #outputFileName <- paste0(siteName,"_summer_meanTemp_expBreak_b3_calibration_varBurn.RData")
-  outputFileName <- paste0(siteName,"_randomWalk_calibration_varBurn.RData")
+  outputFileName <- paste0(siteName,"_randomWalk_forecast_calibration_varBurn.RData")
   if(!file.exists(outputFileName)){
     #Remove year
     yearInt <- which(dataFinal$years==yearRemoved)
-    dataFinal$p <- dataFinal$p[,-yearInt]
-    dataFinal$TairMu <- dataFinal$TairMu[,-yearInt]
-    dataFinal$TairPrec <- dataFinal$TairPrec[,-yearInt]
-    dataFinal$TairMuDay <- dataFinal$TairMuDay[,-yearInt]
-    dataFinal$TairPrecDay <- dataFinal$TairPrecDay[,-yearInt]
-    dataFinal$D <- dataFinal$D[,-yearInt]
-    dataFinal$x1.a <- dataFinal$x1.a[-yearInt]
-    dataFinal$x1.b <- dataFinal$x1.b[-yearInt]
-    dataFinal$N <- dataFinal$N - 1
+    dataFinal$p[,yearInt] <- NA
+    # dataFinal$p <- dataFinal$p[,-yearInt]
+    # dataFinal$TairMu <- dataFinal$TairMu[,-yearInt]
+    # dataFinal$TairPrec <- dataFinal$TairPrec[,-yearInt]
+    # dataFinal$TairMuDay <- dataFinal$TairMuDay[,-yearInt]
+    # dataFinal$TairPrecDay <- dataFinal$TairPrecDay[,-yearInt]
+    # dataFinal$D <- dataFinal$D[,-yearInt]
+    # dataFinal$x1.a <- dataFinal$x1.a[-yearInt]
+    # dataFinal$x1.b <- dataFinal$x1.b[-yearInt]
+    # dataFinal$N <- dataFinal$N - 1
     
     ##Add priors
     dataFinal$s1.PC <- 1.56
