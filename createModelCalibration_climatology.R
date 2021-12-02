@@ -47,8 +47,8 @@ foreach(s =1:nrow(siteData)) %dopar% {
   outputFileName <- paste0(siteName,"_climatology_forecast_calibration_varBurn.RData")
   if(!file.exists(outputFileName)){
     #Remove year
-    if(!is.na(dataFinal$yearsRemoved)){
-      yearRemoved <- dataFinal$yearsRemoved
+    if(!is.na(dataFinal$yearRemoved)){
+      yearRemoved <- dataFinal$yearRemoved
       yearInt <- which(dataFinal$years==yearRemoved)
       # dataFinal$p <- dataFinal$p[,-yearInt]
       # dataFinal$TairMu <- dataFinal$TairMu[,-yearInt]
