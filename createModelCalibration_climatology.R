@@ -39,17 +39,16 @@ p.PC ~ dgamma(s1.PC,s2.PC)
 "
 
 foreach(s =1:nrow(siteData)) %dopar% {
-  #for(s in 1:length(sites)){
+#for(s in 1:nrow(siteData)){
   siteName <- as.character(siteData$siteName[s])
   print(siteName)
   
   load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
-  yearRemoved <- dataFinal$yearsRemoved
-  
   outputFileName <- paste0(siteName,"_climatology_forecast_calibration_varBurn.RData")
   if(!file.exists(outputFileName)){
     #Remove year
-    if(!is.na(yearRemoved)){
+    if(!is.na(dataFinal$yearsRemoved)){
+      yearRemoved <- dataFinal$yearsRemoved
       yearInt <- which(dataFinal$years==yearRemoved)
       # dataFinal$p <- dataFinal$p[,-yearInt]
       # dataFinal$TairMu <- dataFinal$TairMu[,-yearInt]
