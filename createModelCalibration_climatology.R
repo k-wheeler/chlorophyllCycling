@@ -38,27 +38,30 @@ p.PC ~ dgamma(s1.PC,s2.PC)
 }
 "
 
-#foreach(s =1:length(sites)) %dopar% {
-for(s in 1:length(sites)){
-  siteName <- sites[s]
+foreach(s =1:nrow(siteData)) %dopar% {
+  #for(s in 1:length(sites)){
+  siteName <- as.character(siteData$siteName[s])
   print(siteName)
-  yearRemoved <- yearsRemoved[s]
+  
   load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
-  #outputFileName <- paste0(siteName,"_summer_meanTemp_expBreak_b3_calibration_varBurn.RData")
+  yearRemoved <- dataFinal$yearsRemoved
+  
   outputFileName <- paste0(siteName,"_climatology_forecast_calibration_varBurn.RData")
   if(!file.exists(outputFileName)){
     #Remove year
-    yearInt <- which(dataFinal$years==yearRemoved)
-    # dataFinal$p <- dataFinal$p[,-yearInt]
-    # dataFinal$TairMu <- dataFinal$TairMu[,-yearInt]
-    # dataFinal$TairPrec <- dataFinal$TairPrec[,-yearInt]
-    # dataFinal$TairMuDay <- dataFinal$TairMuDay[,-yearInt]
-    # dataFinal$TairPrecDay <- dataFinal$TairPrecDay[,-yearInt]
-    # dataFinal$D <- dataFinal$D[,-yearInt]
-    # dataFinal$x1.a <- dataFinal$x1.a[-yearInt]
-    # dataFinal$x1.b <- dataFinal$x1.b[-yearInt]
-    # dataFinal$N <- dataFinal$N - 1
-    dataFinal$p[,yearInt] <- NA
+    if(!is.na(yearRemoved)){
+      yearInt <- which(dataFinal$years==yearRemoved)
+      # dataFinal$p <- dataFinal$p[,-yearInt]
+      # dataFinal$TairMu <- dataFinal$TairMu[,-yearInt]
+      # dataFinal$TairPrec <- dataFinal$TairPrec[,-yearInt]
+      # dataFinal$TairMuDay <- dataFinal$TairMuDay[,-yearInt]
+      # dataFinal$TairPrecDay <- dataFinal$TairPrecDay[,-yearInt]
+      # dataFinal$D <- dataFinal$D[,-yearInt]
+      # dataFinal$x1.a <- dataFinal$x1.a[-yearInt]
+      # dataFinal$x1.b <- dataFinal$x1.b[-yearInt]
+      # dataFinal$N <- dataFinal$N - 1
+      dataFinal$p[,yearInt] <- NA
+    }
     
     ##Add priors
     dataFinal$s1.PC <- 1.56
@@ -71,7 +74,7 @@ for(s in 1:length(sites)){
                             n.adapt = 1500)
     
     out.burn <- runMCMC_Model(j.model=j.model,variableNames=variableNames,
-                                baseNum = 5000,iterSize = 2000)
+                              baseNum = 5000,iterSize = 2000)
     
     ##Thin the data:
     out.mat <- as.matrix(out.burn)
