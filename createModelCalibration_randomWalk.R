@@ -47,19 +47,21 @@ p.PC ~ dgamma(s1.PC,s2.PC)
 p.proc ~ dgamma(s1.proc,s2.proc)
 }
 "
-
-#foreach(s =1:length(sites)) %dopar% {
-for(s in 3:length(sites)){
+ns <- c(49,56,63,70,77,84,91,98,105,112,119,126)#,183)
+foreach(s =1:length(sites)) %dopar% {
+#for(s in 3:length(sites)){
   siteName <- sites[s]
   print(siteName)
   yearRemoved <- yearsRemoved[s]
   load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
+  for(n in ns){
   #outputFileName <- paste0(siteName,"_summer_meanTemp_expBreak_b3_calibration_varBurn.RData")
-  outputFileName <- paste0(siteName,"_randomWalk_forecast_calibration_varBurn.RData")
+  outputFileName <- paste0(siteName,"_randomWalk_",n,"_forecast_calibration_varBurn.RData")
   if(!file.exists(outputFileName)){
     #Remove year
     yearInt <- which(dataFinal$years==yearRemoved)
     dataFinal$p[,yearInt] <- NA
+    dataFinal$p[(n+1):nrow(dataFinal$p),] <- NA
     # dataFinal$p <- dataFinal$p[,-yearInt]
     # dataFinal$TairMu <- dataFinal$TairMu[,-yearInt]
     # dataFinal$TairPrec <- dataFinal$TairPrec[,-yearInt]
@@ -94,6 +96,7 @@ for(s in 3:length(sites)){
     out.burn2$predict <- window(out.burn$predict,thin=thinAmount)
     out.burn <- out.burn2
     save(out.burn,file = outputFileName)
+  }
   }
 }
 
