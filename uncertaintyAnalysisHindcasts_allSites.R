@@ -94,7 +94,14 @@ uncertaintyAnalysisHindcast_expBreak <- function(n=183,calSite){
   calTran <- as.numeric(tranOffsets[siteData$siteName==calSite,2])
   
   calFileName <- paste0(calSite,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
-  load(calFileName)
+  if(file.exists(calFileName)){
+    load(calFileName)
+  }else{
+    calFileName <- paste0('partial_',calSite,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
+    load(calFileName)
+    out.burn <- partialOutput
+  }
+  
   out.mat <- data.frame(as.matrix(out.burn$param))
   prow = sample.int(nrow(out.mat),Nmc,replace=TRUE)
   
@@ -106,7 +113,7 @@ uncertaintyAnalysisHindcast_expBreak <- function(n=183,calSite){
   crpsDat <- matrix(ncol=2208+2,nrow=nrow(siteData)*2)
   
   for(s in 1:nrow(siteData)){
-  #for(s in 1:3){
+    #for(s in 1:3){
     siteName <- as.character(siteData$siteName[s])
     print(siteName)
     if(siteName!="asa2"){
@@ -208,11 +215,13 @@ for(c in 1:length(sites)){
   n <- ns[c]
   siteName <- sites[c]
   calSite <- siteName
-  pdfName <- paste0("UncertaintyAnaylisHindcast_",calSite,"_Calibration_",n,"_crps_allSites.pdf")
-  print(pdfName)
-  pdf(file=pdfName,height=10,width=60)
-  uncertaintyAnalysisHindcast_expBreak(n=n,calSite=calSite)
-  dev.off()
+  if(!file.exists(paste0("outOfSampleSites_crps_",calSite,"_",n,".csv"))){
+    pdfName <- paste0("UncertaintyAnaylisHindcast_",calSite,"_Calibration_",n,"_crps_allSites.pdf")
+    print(pdfName)
+    pdf(file=pdfName,height=10,width=60)
+    uncertaintyAnalysisHindcast_expBreak(n=n,calSite=calSite)
+    dev.off()
+  }
 }
 # calSite="harvard"
 # pdfName <- paste0("UncertaintyAnaylisHindcast_harvardCalibration_91_crps_allSites.pdf")
