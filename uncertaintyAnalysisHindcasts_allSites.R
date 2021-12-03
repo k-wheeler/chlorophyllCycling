@@ -207,7 +207,6 @@ output <- read.csv("identifiedDivergenceDOYs.csv",header=TRUE)
 for(c in 1:length(sites)){
   n <- ns[c]
   siteName <- sites[c]
-  siteOutput <- subOutput[subOutput$siteName==siteName,]
   calSite <- siteName
   pdfName <- paste0("UncertaintyAnaylisHindcast_",calSite,"_Calibration_",n,"_crps_allSites.pdf")
   print(pdfName)
