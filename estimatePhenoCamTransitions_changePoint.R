@@ -44,7 +44,7 @@ createChangepointModel_Fall <- function(yobs) {
   return(j.model)
 }
 
-n.cores <- 16
+n.cores <- 28
 
 #register the cores.
 registerDoParallel(cores=n.cores)
@@ -71,8 +71,8 @@ foreach(s=1:nrow(siteData)) %dopar% {
 
       j.model <- createChangepointModel_Fall(yobs=p)
       variables <- c("mS","mF","y[1]","k")
-      var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
-                                iterSize = 100000,sampleCutoff = 50000,maxGBR = 50)
+      var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=100000,
+                                iterSize = 50000,sampleCutoff = 5000,maxGBR = 50)
       save(var.burn,file=paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
     }else{
       load(paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
@@ -85,8 +85,8 @@ foreach(s=1:nrow(siteData)) %dopar% {
         
         j.model <- createChangepointModel_Fall(yobs=p)
         variables <- c("mS","mF","y[1]","k")
-        var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
-                                  iterSize = 100000,sampleCutoff = 50000,maxGBR = 50)
+        var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=100000,
+                                  iterSize = 50000,sampleCutoff = 5000,maxGBR = 50)
         save(var.burn,file=paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
       }
     }
