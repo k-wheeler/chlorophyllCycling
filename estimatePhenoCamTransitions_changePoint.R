@@ -52,8 +52,8 @@ registerDoParallel(cores=n.cores)
 dataDirectory <- "data/"
 siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
 siteName <- "harvardblo"
-for(s in 35:nrow(siteData)){
-#foreach(s=1:nrow(siteData)) %dopar% {
+#for(s in 35:nrow(siteData)){
+foreach(s=1:nrow(siteData)) %dopar% {
   siteName <- as.character(siteData$siteName[s])
   print(siteName)
   
@@ -72,8 +72,23 @@ for(s in 35:nrow(siteData)){
       j.model <- createChangepointModel_Fall(yobs=p)
       variables <- c("mS","mF","y[1]","k")
       var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
-                                iterSize = 10000,sampleCutoff = 5000)
+                                iterSize = 100000,sampleCutoff = 50000,maxGBR = 50)
       save(var.burn,file=paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
+    }else{
+      load(paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
+      if(typeof(var.burn)==typeof(FALSE)){
+        if(length(which(dataFinal$p[,yr]<0.10))>0){
+          p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.10)[1]-1),yr]
+        }else{
+          p <- dataFinal$p[,yr]
+        }
+        
+        j.model <- createChangepointModel_Fall(yobs=p)
+        variables <- c("mS","mF","y[1]","k")
+        var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=20000,
+                                  iterSize = 100000,sampleCutoff = 50000,maxGBR = 50)
+        save(var.burn,file=paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
+      }
     }
   }
 }
