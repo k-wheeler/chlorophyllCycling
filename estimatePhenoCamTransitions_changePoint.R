@@ -44,7 +44,7 @@ createChangepointModel_Fall <- function(yobs) {
   return(j.model)
 }
 
-n.cores <- 25
+n.cores <- 28
 
 #register the cores.
 registerDoParallel(cores=n.cores)
