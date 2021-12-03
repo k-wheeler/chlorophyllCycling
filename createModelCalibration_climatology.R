@@ -44,7 +44,7 @@ foreach(s =1:nrow(siteData)) %dopar% {
   print(siteName)
   
   load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
-  outputFileName <- paste0(siteName,"_climatology_forecast_calibration_varBurn.RData")
+  outputFileName <- paste0(siteName,"_climatology_forecast_calibration_varBurn2.RData")
   if(!file.exists(outputFileName)){
     #Remove year
     if(!is.na(dataFinal$yearRemoved)){
