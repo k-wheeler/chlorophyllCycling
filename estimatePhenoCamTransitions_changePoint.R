@@ -26,7 +26,7 @@ createChangepointModel_Fall <- function(yobs) {
   y[1] ~ dbeta(c.alp,c.bet)
   mS ~ dunif(0,1)
   mF ~ dunif(0,1)
-  k ~ dunif(0,100)
+  k ~ dunif(0,183)
   
   for(i in 2:n){
   muS[i] <- y[(i-1)] - mS
@@ -37,45 +37,62 @@ createChangepointModel_Fall <- function(yobs) {
   }
   }
   "
+  inits <- list()
+  c("mS","mF","y[1]","k")
+  for(i in 1:nchain){
+    inits[[i]] <- list(mS = rnorm(1,0.0025,0.0001),
+                       mF = rnorm(1,0.03,0.001),
+                       k = rnorm(1,140,1))
+  }
   
   j.model   <- jags.model(file = textConnection(DB_model),
                           data = data,
-                          n.chains = nchain)
+                          inits = inits,
+                          n.chains = nchain,
+                          n.adapt = 2000)
   return(j.model)
 }
 
-n.cores <- 28
+#n.cores <- 16
 
 #register the cores.
-registerDoParallel(cores=n.cores)
+#registerDoParallel(cores=n.cores)
 
 dataDirectory <- "data/"
 siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
-siteName <- "harvardblo"
-#for(s in 35:nrow(siteData)){
-foreach(s=1:nrow(siteData)) %dopar% {
-  siteName <- as.character(siteData$siteName[s])
+siteName <- "russellsage"
+yr=2
+#for(s in 1:nrow(siteData)){
+#foreach(s=nrow(siteData):1) %dopar% {
+#  siteName <- as.character(siteData$siteName[s])
   print(siteName)
   
   load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
   
+  #foreach(yr=1:dataFinal$N) %dopar% {
   for(yr in 1:dataFinal$N){
     yrName <- dataFinal$years[yr]
-    if(!file.exists(paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))){
+    print(yrName)
+    if(!file.exists(paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn_updatedK.RData"))){
       #p <- dataFinal$p[dataFinal$p[,yr]>0.15,yr]
-      if(length(which(dataFinal$p[,yr]<0.10))>0){
-        p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.10)[1]-1),yr]
+      if(length(which(dataFinal$p[,yr]<0.15))>0){
+        p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.15)[1]-1),yr]
       }else{
         p <- dataFinal$p[,yr]
       }
 
       j.model <- createChangepointModel_Fall(yobs=p)
       variables <- c("mS","mF","y[1]","k")
-      var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=100000,
-                                iterSize = 50000,sampleCutoff = 5000,maxGBR = 50)
-      save(var.burn,file=paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
+      var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=50000,
+                                iterSize = 10000,sampleCutoff = 5000,maxGBR = 50)
+      if(typeof(var.burn)!=typeof(FALSE)){
+        out.mat <- as.matrix(var.burn)
+        thinAmount <- round(nrow(out.mat)/5000,digits=0)
+        var.burn <- window(var.burn,thin=thinAmount)
+      }
+      save(var.burn,file=paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn_updatedK.RData"))
     }else{
-      load(paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
+      load(paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
       if(typeof(var.burn)==typeof(FALSE)){
         if(length(which(dataFinal$p[,yr]<0.10))>0){
           p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.10)[1]-1),yr]
@@ -86,9 +103,14 @@ foreach(s=1:nrow(siteData)) %dopar% {
         j.model <- createChangepointModel_Fall(yobs=p)
         variables <- c("mS","mF","y[1]","k")
         var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=100000,
-                                  iterSize = 50000,sampleCutoff = 5000,maxGBR = 50)
-        save(var.burn,file=paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
+                                  iterSize = 5000,sampleCutoff = 1000,maxGBR = 5)
+        if(typeof(var.burn)!=typeof(FALSE)){
+          out.mat <- as.matrix(var.burn)
+          thinAmount <- round(nrow(out.mat)/5000,digits=0)
+          var.burn <- window(var.burn,thin=thinAmount)
+        }
+        save(var.burn,file=paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn_updatedK.RData"))
       }
     }
   }
-}
+#}

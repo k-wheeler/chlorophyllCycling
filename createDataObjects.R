@@ -1,7 +1,6 @@
 ##Script to create consolidated data objects (dataFinal)
-
-library(PhenoForecast)
-library(PhenologyBayesModeling)
+library(PhenoForecast) #From github: k-wheeler/NEFI_pheno/PhenoForecast
+library(PhenologyBayesModeling) #From github: k-wheeler/NEFI_pheno/PhenologyBayesModeling 
 library(rjags)
 library(runjags)
 library(suncalc)
@@ -38,7 +37,7 @@ foreach(s=1:nrow(siteData)) %dopar% {
   }
   TZ <- as.numeric(siteData[s,6])
   URLs <- URL
-  load(file=paste(dataDirectory,siteName,"_phenopixOutputs.RData",sep=""))
+  load(file=paste(dataDirectory,siteName,"_phenopixOutputs.RData",sep="")) #Created in createElmoreFitsForRescaling.R package
   fittedDat=allDat
   ERA5dataFolder <- paste("/projectnb/dietzelab/kiwheel/ERA5/Data/",siteName,"/",sep="")
   
@@ -69,7 +68,7 @@ foreach(s=1:nrow(siteData)) %dopar% {
   
   dat2 <- data.frame(dates=days,years=years,months=months,p=p)
   calFileName <- paste0(siteName,"_",startDate,"_",endDate,"_era5TemperatureMembers.nc")
-  datTairEns <- load_ERA5(ERA5dataFolder=ERA5dataFolder,calFileName=calFileName,TZ_offset=TZ,variable="Tair")
+  datTairEns <- load_ERA5(ERA5dataFolder=ERA5dataFolder,calFileName=calFileName,TZ_offset=TZ,variable="Tair") 
   datTairEnsDay <- load_ERA5_daytime(ERA5dataFolder=ERA5dataFolder,calFileName=calFileName,TZ_offset=TZ,variable="Tair",lat=lat,long=long)
   
   TairMu <- apply(X=datTairEns,MARGIN=2,FUN=mean)

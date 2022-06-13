@@ -19,7 +19,7 @@ changepointModel <- function(y1,mS,mF,k,xseq){
 
 dataDirectory <- "data/"
 siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
-pdf(file="PhenoCam_transitionEstimates.pdf",height=6,width=10)
+pdf(file="PhenoCam_transitionEstimates_updatedK.pdf",height=6,width=10)
 
 for(s in 1:nrow(siteData)){
   siteName <- as.character(siteData$siteName[s])
@@ -36,7 +36,7 @@ for(s in 1:nrow(siteData)){
       }
       yrName <- dataFinal$years[yr]
       print(yrName)
-      p.file <- paste0(siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData")
+      p.file <- paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn_updatedK.RData")
       plot(days,dataFinal$p[,yr],pch=20,main=paste(siteName,yrName))
       abline(h=0.15,col="red")
       

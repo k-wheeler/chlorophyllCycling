@@ -6,24 +6,9 @@ library(scoringRules)
 
 library(doParallel)
 
-n.cores <- 25
+n.cores <- 24
 registerDoParallel(cores=n.cores)
 
-c25 <- c(
-  "dodgerblue2", "#E31A1C", # red
-  "green4",
-  "#6A3D9A", # purple
-  "#FF7F00", # orange
-  "black", "gold1",
-  "skyblue2", "#FB9A99", # lt pink
-  "palegreen2",
-  "#CAB2D6", # lt purple
-  "#FDBF6F", # lt orange
-  "gray70", "khaki2",
-  "maroon", "orchid1", "deeppink1", "blue1", "steelblue4",
-  "darkturquoise", "green1", "yellow4", "yellow3",
-  "darkorange4", "brown"
-)
 
 #Create forecast step model:
 #' Basic logistic forecast step
@@ -82,7 +67,7 @@ forecastStep <- function(IC,b0,b1,b2,b3,b4,Q=0,n,NT,Tair,D){
 }
 
 
-uncertaintyAnalysisHindcast_expBreak <- function(n=183,calSite){
+uncertaintyAnalysisHindcast_expBreak <- function(calSite,n=183){
   dataDirectory <- "data/"
   tranOffsets <- read.csv('phenocamTransitions_fromMean.csv',header=TRUE)
   siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
@@ -93,11 +78,23 @@ uncertaintyAnalysisHindcast_expBreak <- function(n=183,calSite){
   ##Load calibration data:
   calTran <- as.numeric(tranOffsets[siteData$siteName==calSite,2])
   
-  calFileName <- paste0(calSite,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
+
+  tranID <- which(tranOffsets$siteName==calSite)
+  tran_DOY <- as.numeric(tranOffsets[tranID,2])
+  
+  #n=round(tran_DOY+offset,digits=0)-182
+  print(n)
+  calFileName <- paste0('finalVarBurns/',calSite,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
+  
   if(file.exists(calFileName)){
     load(calFileName)
+    if(typeof(out.burn)==typeof(FALSE)){
+      calFileName <- paste0('finalVarBurns/partial_',calSite,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
+      load(calFileName)
+      out.burn <- partialOutput
+    }
   }else{
-    calFileName <- paste0('partial_',calSite,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
+    calFileName <- paste0('finalVarBurns/partial_',calSite,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
     load(calFileName)
     out.burn <- partialOutput
   }
@@ -119,7 +116,7 @@ uncertaintyAnalysisHindcast_expBreak <- function(n=183,calSite){
     if(siteName!="asa2"){
       load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData")) #Load Data
       
-      climFileName <- paste0(siteName,"_climatology_forecast_calibration_varBurn.RData")
+      climFileName <- paste0(siteName,"_climatology_forecast_calibration_varBurn2.RData")
       load(climFileName)
       pred.matYr <- data.frame(as.matrix(out.burn))[,1:184]
       pred.mat <- pred.matYr
@@ -192,36 +189,28 @@ uncertaintyAnalysisHindcast_expBreak <- function(n=183,calSite){
       #lines(seq(1,length(dataFinal$p)),crpsClim,type="l",main=paste0(siteName," ",n),xlim=c(0,2500),col="red")
     }
   }
-  write.table(x=crpsDat,sep=",",file=paste0("outOfSampleSites_crps_",calSite,"_",n,".csv"),row.names=FALSE,col.names=FALSE,quote = FALSE)
+  write.table(x=crpsDat,sep=",",file=paste0("outOfSampleSites_crps_",calSite,"_183.csv"),row.names=FALSE,col.names=FALSE,quote = FALSE)
 }
 
 sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
            "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
-           "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","canadaOA","alligatorriver","readingma",
-           "bullshoals","thompsonfarm2N","ashburnham","shalehillsczo")
+           "bartlettir","oakridge1","hubbardbrook","alligatorriver","readingma","bullshoals",
+           "willowcreek","downerwoods","laurentides","russellsage","sanford","boundarywaters")
 
 
-#ns=c(77,84,91,98,105,112,119,126)
-ns <- c(112,105,183,105,98,
-        183,119,84,112,91,
-        119,183,183,91,98,
-        119,98,183,91,98,
-        119,183,119,183)
+#output <- read.csv("identifiedDivergenceDOYs.csv",header=TRUE)
 
-output <- read.csv("identifiedDivergenceDOYs.csv",header=TRUE)
-
-#foreach(c =1:length(sites)) %dopar% {
-for(c in 1:length(sites)){
-  n <- ns[c]
+foreach(c =1:length(sites)) %dopar% {
+#for(c in 1:length(sites)){
   siteName <- sites[c]
   calSite <- siteName
-  if(!file.exists(paste0("outOfSampleSites_crps_",calSite,"_",n,".csv"))){
-    pdfName <- paste0("UncertaintyAnaylisHindcast_",calSite,"_Calibration_",n,"_crps_allSites.pdf")
+  #if(!file.exists(paste0("outOfSampleSites_crps_",calSite,"_20offset_updated.csv"))){
+    pdfName <- paste0("UncertaintyAnaylisHindcast_",calSite,"_Calibration_crps_allSites_183.pdf")
     print(pdfName)
     pdf(file=pdfName,height=10,width=60)
-    uncertaintyAnalysisHindcast_expBreak(n=n,calSite=calSite)
+    uncertaintyAnalysisHindcast_expBreak(calSite=calSite)
     dev.off()
-  }
+  #}
 }
 # calSite="harvard"
 # pdfName <- paste0("UncertaintyAnaylisHindcast_harvardCalibration_91_crps_allSites.pdf")
