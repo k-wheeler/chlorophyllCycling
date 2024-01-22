@@ -3,9 +3,8 @@ library('runjags')
 library('ecoforecastR')
 library('RColorBrewer')
 library(scoringRules)
-siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
+library('generalVariables.R')
 
-dataDirectory <- "data/"
 Nmc <- 5000
 
 NT <- 184
@@ -13,20 +12,18 @@ totalSiteYears <- 0
 
 pdfName <- "climatology_fits.pdf"
 pdf(file=pdfName,height=18,width=60)
-#par(mfrow=c(7,2))
+
 par(mfcol=c(6,2))
 
 for(s in 1:nrow(siteData)){
-#for(s in 1:5){
-  
   siteName <- as.character(siteData$siteName[s])
   
   print(siteName)
-  load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData")) #Load Data
+  load(paste0(dataDirectory,siteName,"_dataFinal.RData")) #Load Data
   totalSiteYears <- totalSiteYears + dataFinal$N
   
   yearInt <- which(dataFinal$years==dataFinal$yearRemoved)
-  climFileName <- paste0(siteName,"_climatology_forecast_calibration_varBurn2.RData")
+  climFileName <- paste0(climatologyModelOutputsFolder,siteName,"_climatology_forecast_calibration_varBurn.RData")
   if(file.exists(climFileName)){
     load(climFileName)
     pred.matYr <- data.frame(as.matrix(out.burn))[,1:184]

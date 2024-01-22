@@ -6,16 +6,9 @@ library('ecoforecastR')
 library('RColorBrewer')
 library('scoringRules')
 library('scales')
-dataDirectory <- "data/"
+source('generalVariables.R')
 
-sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
-           "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
-           "bartlettir","oakridge1","hubbardbrook","alligatorriver","readingma","bullshoals",
-           "willowcreek","downerwoods","laurentides","russellsage","sanford","boundarywaters") ##Calibration Sites 
-
-siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
-
-tranOffsets <- read.csv('phenocamTransitions_fromMeanFiltered.csv',header=TRUE)
+tranOffsets <- read.csv(allPhenoTranFile,header=TRUE)
 cutOff <- -0.02 #Cut-off For the value of second-differences that constitutes an inflection based off of PhenoCam data
 NT <- 184
 avgN <- 15
@@ -76,19 +69,13 @@ for(i in 1:5){
   siteName <- selectSites[i]
   print(siteName)
   n=ns[i]
-  load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData")) #Load Data
+  load(paste0(dataDirectory,siteName,"_dataFinal.RData")) #Load Data
   yearRemoved <- dataFinal$yearRemoved
   
   yearInt <- which(dataFinal$years==yearRemoved)
-  fileName <- paste0('finalVarBurns/',siteName,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
-  if(file.exists(fileName)){
-    load(fileName)
-    if(typeof(out.burn)==typeof(FALSE)){
-      fileName <- paste0('finalVarBurns/partial_',siteName,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
-      load(fileName)
-      out.burn <- partialOutput
-    }
-  }else{
+  fileName <- paste0(CCmodelOutputsFolder,siteName,"_",n,"_ccModel_forecast_calibration_varBurn.RData")
+  load(fileName)
+  if(typeof(out.burn)==typeof(FALSE)){
     fileName <- paste0('finalVarBurns/partial_',siteName,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
     load(fileName)
     out.burn <- partialOutput
@@ -102,8 +89,7 @@ for(i in 1:5){
   b3 <- out.mat$b3[prow]
   pred.mat <- data.frame(as.matrix(out.burn$predict))
   ci = apply(pred.mat,2,quantile,c(0.025,0.5,0.975))
-  #dates <- as.Date(seq(1,length(dataFinal$p)),origin=as.Date(paste0(dataFinal$years[1],"-01-01")))
-  
+
   if(i==1){
     dataFinal$p <- cbind(dataFinal$p[,1:4],rep(NA,184),dataFinal$p[,5:9])
   }else if(i == 2){
@@ -113,10 +99,6 @@ for(i in 1:5){
   }else if(i ==5){
     dataFinal$p <- cbind(rep(NA,184),rep(NA,184),dataFinal$p)
   }
-  
-  #if(i !=3){
-  #  dataFinal$p <- cbind(rep(NA,184),rep(NA,184),dataFinal$p)
-  #}
   
   if(i!=5){
     plot(dates,rep(NA,length(dates)),pch=20,xlab="",ylab="",ylim=c(0,1),
@@ -136,12 +118,10 @@ for(i in 1:5){
       includeP[,(yearInt+2)] <- NA
     }
 
-
     points(dates,includeP,col=col.alpha("black",1),pch=19,cex=0.75)
     
     points(dates,excludeP,col=col.alpha("red",1),pch=19,cex=0.75)
     if(i==1){
-      #ecoforecastR::ciEnvelope(dates[369:length(dates)],ci[1,],ci[3,],col=col.alpha("blue",0.50))
       ecoforecastR::ciEnvelope(dates[c(seq(1,4*184),seq((5*184+1),(10*184)))],ci[1,],ci[3,],col=col.alpha("blue",0.50))
       polygon(x=c((4*184),(4*184),(5*184),(5*184)),c(0,1.2,1.2,0),col="white",border=NA)
     }else if(i==2){
@@ -150,21 +130,17 @@ for(i in 1:5){
     }else if(i == 3 | i==4){
       ecoforecastR::ciEnvelope(dates[737:length(dates)],ci[1,],ci[3,],col=col.alpha("blue",0.50))
     }
-    #ecoforecastR::ciEnvelope(dates[c(seq(1,4*184),seq((5*184+1),(10*184)))],ci[1,],ci[3,],col=col.alpha("blue",0.50))
   }else{
     plot(dates,rep(NA,length(dates)),pch=20,xlab="Date",ylim=c(0,1),ylab="",
          bty="n",main=tles[i],xaxt="n",yaxt="n",xlim=c(0,1850),cex.main=1.5)
     axis(side=1,at=dates[newYears],labels=seq(as.Date("2011-07-01"),
                                               as.Date("2022-12-31"),"year"),pos=-0.02,cex=2,cex.axis=1.5)
-    #points(dates,dataFinal$p,pch=20,col="red")
     includeP <- dataFinal$p
-    #includeP[(n+1):nrow(includeP),] <- NA
     includeP[,yearInt] <- NA
     points(dates,includeP,col=col.alpha("black",1),pch=19,cex=0.75)
     
     excludeP <- dataFinal$p
     excludeP[1:n,-yearInt] <- NA
-    #excludeP[,-yearInt] <- NA
     points(dates,excludeP,col=col.alpha("red",1),pch=17,cex=0.75)
     ecoforecastR::ciEnvelope(dates[369:length(dates)],ci[1,],ci[3,],col=col.alpha("blue",0.50))
   }
@@ -238,14 +214,13 @@ legend('topleft',col=c("black","red"),c("All","Validation"),lty=c(1,2),
        bty="n",cex=1)
 dev.off()
 
-
 ##Figure 2: Correlation between maximum inflections: ----
 phenoCamInflectionDat <- (matrix(ncol=3,nrow=0))
 colnames(phenoCamInflectionDat) <- c("siteName","year","minDiffDiff_PC") #Calculate minimum second differences for PhenoCam data
 for(s in 1:length(sites)){
   siteName <- as.character(sites[s])
   print(siteName)
-  load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
+  load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
   
   for(yr in 1:dataFinal$N){
     yrName <- dataFinal$years[yr]
@@ -408,17 +383,17 @@ for(rnd in 3:5){
   daysALL <- matrix(ncol=186,nrow=0)
   allTrans <- numeric()
   for(s in 1:length(sites)){
-  #for(s in 1:4){
+    #for(s in 1:4){
     siteName <- sites[s]
     
     print(siteName)
-    load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData")) #Load Data
+    load(paste0(dataDirectory,siteName,"_dataFinal.RData")) #Load Data
     load(paste0(siteName,"_inflectionPointData_15.RData"))#outputData
     minDiffDiffDat <- subset(outputData,offset==offset)#outputData[outputData$offset==offset,]
     yearRemoved <- dataFinal$yearRemoved
     
     yearInt <- which(dataFinal$years==yearRemoved)
-    climFileName <- paste0(siteName,"_climatology_forecast_calibration_varBurn2.RData")
+    climFileName <- paste0(climatologyModelOutputsFolder,siteName,"_climatology_forecast_calibration_varBurn.RData")
     load(climFileName)
     pred.matYr <- data.frame(as.matrix(out.burn))[,1:184]
     pred.mat <- pred.matYr
@@ -441,7 +416,6 @@ for(rnd in 3:5){
     }
     
     for(yr in 1:length(years)){
-      #print(dataFinal$years[yr])
       yrName=dataFinal$years[yr]
       print(yrName)
       tranID <- which(tranOffsets$siteName==siteName)
@@ -454,108 +428,37 @@ for(rnd in 3:5){
       }else{
         minDiffDiff <- 0
       }
-      fileName <- paste0('finalVarBurns/',siteName,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
+      fileName <- paste0(CCmodelOutputsFolder,siteName,"_",n,"_ccModel_forecast_calibration_varBurn.RData")
       #print(fileName)
       if(file.exists(fileName)){
         load(fileName) #Load Model Output 
-        if(typeof(out.burn)!=typeof(FALSE)){
-          out.mat <- data.frame(as.matrix(out.burn$param))
-          b0 <- out.mat$b0
-          b4 <- out.mat$b4
-          b3 <- out.mat$b3
-          
-          if(diff(quantile(b0,c(0.025,0.975)))<0.25 & diff(quantile(b4,c(0.025,0.975)))<0.25 & diff(quantile(b3,c(0.025,0.975)))<0.25){
-            convergedWell <- TRUE
-          }else{
-            convergedWell <- FALSE
-          }
-          
-          pred.mat <- data.frame(as.matrix(out.burn$predict))
-          pred.mat.year <- pred.mat[,(184*(yr-1)+1):(184*(yr-1)+184)]
-          
-          crpsVals <- numeric()
-          for(i in 1:ncol(pred.mat.year)){
-            if(!is.na(dataFinal$p[i,yr])){
-              crpsVals <- c(crpsVals,crps_sample(y=dataFinal$p[i,yr],dat=pred.mat.year[,i]))
-            }else{
-              crpsVals <- c(crpsVals,NA)
-            }
-          }
-          crps_diff <- crpsVals-(crpsClim[(184*(yr-1)+1):(184*(yr-1)+184)])
-          if(convergedWell){
-            crpsDiffsALL <- rbind(crpsDiffsALL,c(siteName,yrName,crps_diff))
-            daysALL <- rbind(daysALL,c(siteName,yrName,((182 +days)-tran_DOY)))
-            allTrans <- c(allTrans,as.numeric(tranOffsets[tranID,(yr+2)]))
-          }
+        out.mat <- data.frame(as.matrix(out.burn$param))
+        b0 <- out.mat$b0
+        b4 <- out.mat$b4
+        b3 <- out.mat$b3
+        
+        if(diff(quantile(b0,c(0.025,0.975)))<0.25 & diff(quantile(b4,c(0.025,0.975)))<0.25 & diff(quantile(b3,c(0.025,0.975)))<0.25){
+          convergedWell <- TRUE
         }else{
-          fileName <- paste0('finalVarBurns/partial_',siteName,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
-          if(file.exists(fileName)){
-            load(fileName) #Load Model Output 
-            out.mat <- data.frame(as.matrix(partialOutput$param))
-            b0 <- out.mat$b0
-            b4 <- out.mat$b4
-            b3 <- out.mat$b3
-            
-            if(diff(quantile(b0,c(0.025,0.975)))<0.25 & diff(quantile(b4,c(0.025,0.975)))<0.25 & diff(quantile(b3,c(0.025,0.975)))<0.25){
-              convergedWell <- TRUE
-            }else{
-              convergedWell <- FALSE
-            }
-            
-            pred.mat <- data.frame(as.matrix(partialOutput$predict))
-            pred.mat.year <- pred.mat[,(184*(yr-1)+1):(184*(yr-1)+184)]
-            
-            crpsVals <- numeric()
-            for(i in 1:ncol(pred.mat.year)){
-              if(!is.na(dataFinal$p[i,yr])){
-                crpsVals <- c(crpsVals,crps_sample(y=dataFinal$p[i,yr],dat=pred.mat.year[,i]))
-              }else{
-                crpsVals <- c(crpsVals,NA)
-              }
-            }
-            crps_diff <- crpsVals-(crpsClim[(184*(yr-1)+1):(184*(yr-1)+184)])
-            if(convergedWell){
-              crpsDiffsALL <- rbind(crpsDiffsALL,c(siteName,yrName,crps_diff))
-              daysALL <- rbind(daysALL,c(siteName,yrName,((182 +days)-tran_DOY)))
-              allTrans <- c(allTrans,as.numeric(tranOffsets[tranID,(yr+2)]))
-            }
+          convergedWell <- FALSE
+        }
+        
+        pred.mat <- data.frame(as.matrix(out.burn$predict))
+        pred.mat.year <- pred.mat[,(184*(yr-1)+1):(184*(yr-1)+184)]
+        
+        crpsVals <- numeric()
+        for(i in 1:ncol(pred.mat.year)){
+          if(!is.na(dataFinal$p[i,yr])){
+            crpsVals <- c(crpsVals,crps_sample(y=dataFinal$p[i,yr],dat=pred.mat.year[,i]))
+          }else{
+            crpsVals <- c(crpsVals,NA)
           }
         }
-      }else{
-        fileName <- paste0('finalVarBurns/partial_',siteName,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
-        if(file.exists(fileName)){
-          res <- try(load(fileName))#Load Model Output 
-          if(inherits(res,"try-error")){
-            next
-          }#Load Model Output 
-          out.mat <- data.frame(as.matrix(partialOutput$param))
-          b0 <- out.mat$b0
-          b4 <- out.mat$b4
-          b3 <- out.mat$b3
-          
-          if(diff(quantile(b0,c(0.025,0.975)))<0.25 & diff(quantile(b4,c(0.025,0.975)))<0.25 & diff(quantile(b3,c(0.025,0.975)))<0.25){
-            convergedWell <- TRUE
-          }else{
-            convergedWell <- FALSE
-          }
-          
-          pred.mat <- data.frame(as.matrix(partialOutput$predict))
-          pred.mat.year <- pred.mat[,(184*(yr-1)+1):(184*(yr-1)+184)]
-          
-          crpsVals <- numeric()
-          for(i in 1:ncol(pred.mat.year)){
-            if(!is.na(dataFinal$p[i,yr])){
-              crpsVals <- c(crpsVals,crps_sample(y=dataFinal$p[i,yr],dat=pred.mat.year[,i]))
-            }else{
-              crpsVals <- c(crpsVals,NA)
-            }
-          }
-          crps_diff <- crpsVals-(crpsClim[(184*(yr-1)+1):(184*(yr-1)+184)])
-          if(convergedWell){
-            crpsDiffsALL <- rbind(crpsDiffsALL,c(siteName,yrName,crps_diff))
-            daysALL <- rbind(daysALL,c(siteName,yrName,((182 +days)-tran_DOY)))
-            allTrans <- c(allTrans,as.numeric(tranOffsets[tranID,(yr+2)]))
-          }
+        crps_diff <- crpsVals-(crpsClim[(184*(yr-1)+1):(184*(yr-1)+184)])
+        if(convergedWell){
+          crpsDiffsALL <- rbind(crpsDiffsALL,c(siteName,yrName,crps_diff))
+          daysALL <- rbind(daysALL,c(siteName,yrName,((182 +days)-tran_DOY)))
+          allTrans <- c(allTrans,as.numeric(tranOffsets[tranID,(yr+2)]))
         }
       }
     }
@@ -666,9 +569,9 @@ jpeg("CRPS_heatmap_includedVsDay.jpeg",width=4.5,height=4.5,units = "in",res=100
 par(mfrow=c(1,1))
 par(mai=c(0.8,0.8,0.2,0.4))
 par(pty="s")
-load("crpsMat_includedVsDay_Complete.RData") #loaded as crpsMat; Created in createCRPSpercentageMatrix.R
-load(file="daysOffset_includedVsDay.RData") #loaded as daysOffset; Created in createCRPSpercentageMatrix.R
-load(file="reorganizedDat_includedVsDay.RData")#loaded as reorganizedDat; Created in createCRPSpercentageMatrix.R
+load(crpsMatFile) #loaded as crpsMat; Created in createCRPSpercentageMatrix.R
+load(file=daysOffsetFile) #loaded as daysOffset; Created in createCRPSpercentageMatrix.R
+load(file=reorganizedDatFile)#loaded as reorganizedDat; Created in createCRPSpercentageMatrix.R
 image(x=daysOffset,y=daysOffset,z=t(crpsMat),col=c("#a6611a","#dfc27d","#80cdc1","#018571"),xlab="Days Included Relative to Transition Date",
       ylab="Predicted Day Relative to Transition Date",main="")
 segments(0,daysOffset[1],0,daysOffset[length(daysOffset)],col="black",lwd=2,lty=2)
@@ -694,7 +597,7 @@ plotOOSWithheldYear <- function(type,vl,sites,allSites){
   elevs <- matrix(nrow=length(sites),ncol=70)
   pValsMat <- matrix(nrow=length(sites),ncol=7)
   colnames(pValsMat) <- c("temps","precips","lats","mins","maxs","dtes","elevs")
-  tranOffsets <- read.csv('phenocamTransitions_fromMean.csv',header=TRUE)
+  tranOffsets <- read.csv(allPhenoTranFile,header=TRUE)
   
   for(i in 1:length(sites)){
 
@@ -711,7 +614,7 @@ plotOOSWithheldYear <- function(type,vl,sites,allSites){
       #print(siteName)
       s <- which(crpsDat[,1]==siteName)[vl]
       siteInfo <- siteData[as.character(siteData$siteName)==siteName,]
-      load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData")) #Load Data
+      load(paste0(dataDirectory,siteName,"_dataFinal.RData")) #Load Data
       yearRemoved <- dataFinal$yearRemoved
       
       yr <- which(dataFinal$years==yearRemoved)
@@ -761,95 +664,14 @@ plotOOSWithheldYear <- function(type,vl,sites,allSites){
       
       j=j+1
     }
-    # if(type=="after"){
-    #   print("entered")
-    #   #mdl <- lm(OOScrps[i,]~temps[i,]+precips[i,]+lats[i,]+mins[i,]+maxs[i,]+dtes[i,]+elevs[i,])
-    #   mdl <- lm(OOScrps[i,]~temps[i,])
-    #   sm <- summary(mdl) 
-    #   pValsMat[i,1] <- round(sm$coefficients[2,4],digits=3)
-    #   mdl <- lm(OOScrps[i,]~precips[i,])
-    #   sm <- summary(mdl) 
-    #   pValsMat[i,2] <- round(sm$coefficients[2,4],digits=3)
-    #   mdl <- lm(OOScrps[i,]~lats[i,])
-    #   sm <- summary(mdl) 
-    #   pValsMat[i,3] <- round(sm$coefficients[2,4],digits=3)
-    #   mdl <- lm(OOScrps[i,]~mins[i,])
-    #   sm <- summary(mdl) 
-    #   pValsMat[i,4] <- round(sm$coefficients[2,4],digits=3)
-    #   mdl <- lm(OOScrps[i,]~maxs[i,])
-    #   sm <- summary(mdl) 
-    #   pValsMat[i,5] <- round(sm$coefficients[2,4],digits=3)
-    #   mdl <- lm(OOScrps[i,]~dtes[i,])
-    #   sm <- summary(mdl) 
-    #   pValsMat[i,6] <- round(sm$coefficients[2,4],digits=3)
-    #   mdl <- lm(OOScrps[i,]~elevs[i,])
-    #   sm <- summary(mdl) 
-    #   pValsMat[i,7] <- round(sm$coefficients[2,4],digits=3)
-    # }
+
   }
   if(type=="after"){
-      #mdl <- lm(OOScrps~temps+precips+lats+mins+maxs[i,]+dtes[i,]+elevs[i,])
-        #mdl <- lm(OOScrps[i,]~temps[i,]+precips[i,]+lats[i,]+mins[i,]+maxs[i,]+dtes[i,]+elevs[i,])
-        # mdl <- lm(as.vector(OOScrps)~as.vector(temps))
-        # sm <- summary(mdl)
-        # print("temps")
-        # sm$adj.r.squared
-        # sm$coefficients[2,4]
-        # 
-        # mdl <- lm(as.vector(OOScrps)~as.vector(precips))
-        # sm <- summary(mdl)
-        # print("precips")
-        # sm$adj.r.squared
-        # sm$coefficients[2,4]
-        # 
-        # mdl <- lm(as.vector(OOScrps)~as.vector(lats))
-        # sm <- summary(mdl)
-        # print("lats")
-        # sm$adj.r.squared
-        # sm$coefficients[2,4]
-        # 
-        # mdl <- lm(as.vector(OOScrps)~as.vector(mins))
-        # sm <- summary(mdl)
-        # print("mins")
-        # sm$adj.r.squared
-        # sm$coefficients[2,4]
-        # 
-        # mdl <- lm(as.vector(OOScrps)~as.vector(maxs))
-        # sm <- summary(mdl)
-        # print("maxs")
-        # sm$adj.r.squared
-        # sm$coefficients[2,4]
-        # 
-        # mdl <- lm(as.vector(OOScrps)~as.vector(dtes))
-        # sm <- summary(mdl)
-        # print("dtes")
-        # sm$adj.r.squared
-        # sm$coefficients[2,4]
-        # 
-        # mdl <- lm(as.vector(OOScrps)~as.vector(elevs))
-        # sm <- summary(mdl)
-        # print("elevs")
-        # sm$adj.r.squared
-        # sm$coefficients[2,4]
-    
-    # mdl <- lm(as.vector(OOScrps)~as.vector(temps)+as.vector(lats))
-    # sm <- summary(mdl)
-    # print("temps + lats")
-    # sm$adj.r.squared
-    # sm$coefficients[,4]
-    # 
-    # mdl <- lm(as.vector(OOScrps)~as.vector(temps)+as.vector(maxs))
-    # sm <- summary(mdl)
-    # print("temps + maxs")
-    # sm$adj.r.squared
-    # sm$coefficients[,4]
-    
     mdl <- lm(as.vector(OOScrps)~as.vector(temps)+as.vector(maxs)+as.vector(lats))
     sm <- summary(mdl)
     print("temps + maxs + lats")
     sm$adj.r.squared
     sm$coefficients[,4]
-    
   }
   return(OOScrps)
 }
@@ -897,7 +719,7 @@ write.csv(output,file="transferabilityPercentBetter.csv",row.names=FALSE,quote=F
 #Supplementary Figure: Boston Common Time-series Examples and Fits ----
 library(PhenologyBayesModeling)
 siteName <- "bostoncommon"
-load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData")) #Load Data
+load(paste0(dataDirectory,siteName,"_dataFinal.RData")) #Load Data
 
 #jpeg("curvePartsFigureRAW.jpeg",width=10,height=4.4,units = "in",res=1000)
 plot(as.vector(dataFinal$p),pch=20)

@@ -5,20 +5,19 @@ library(tidyverse)
 library(randomForest)
 library(caTools)
 library(tidyverse)
-dataDirectory <- "data/"
-siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
+source('generalVariables')
 
-tranOffsets = read.csv('phenocamTransitions_fromMean.csv',header=TRUE)
+tranOffsets = read.csv(allPhenoTranFile,header=TRUE)
 tranOffsets$meanDOY <- tranOffsets$meanDOY - 181
 
 greenData <- matrix(nrow=nrow(siteData),ncol=7)
 coData <- matrix(nrow=nrow(siteData),ncol=7)
-#slopeData <- matrix(nrow=nrow(siteData),ncol=3)
+
 
 for(s in seq_along(siteData$siteName)[-6]){
   siteName <- siteData$siteName[s]
   print(siteName)
-  load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData")) #dataFinal <- rescaled p so I also need the original
+  load(paste0(dataDirectory,siteName,"_dataFinal.RData")) #dataFinal <- rescaled p so I also need the original
   load(file=paste0(dataDirectory,siteName,"_phenopixOutputs.RData"))
   
   tranID <- which(tranOffsets$siteName==siteName)
@@ -38,10 +37,6 @@ for(s in seq_along(siteData$siteName)[-6]){
     for(t in seq_along(tranDays)){
       p_trans <- c(p_trans,dataFinal$p[round(tranDays[t],digits=0),t])
       gcc_trans <- c(gcc_trans,dataFinal$gcc[round(tranDays[t],digits=0),t])
-      # temp_before <- c(temp_before,mean(dataFinal$TairMu[((round(tranDays[t],digits=0)-7)):(round(tranDays[t],digits=0)-1),t]))
-      # temp_after <- c(temp_after,mean(dataFinal$TairMu[((round(tranDays[t],digits=0))):(round(tranDays[t],digits=0)+6),t]))
-      # temp_diff <- c(temp_diff,(mean(dataFinal$TairMu[((round(tranDays[t],digits=0))):(round(tranDays[t],digits=0)+6),t])-
-      #                             mean(dataFinal$TairMu[((round(tranDays[t],digits=0)-7)):(round(tranDays[t],digits=0)-1),t])))
       
       temp_before <- c(temp_before,mean(dataFinal$TairMu[((round(tranDays[t],digits=0)-14)):(round(tranDays[t],digits=0)-8),t]))
       temp_after <- c(temp_after,mean(dataFinal$TairMu[((round(tranDays[t],digits=0)-7)):(round(tranDays[t],digits=0)-1),t]))
@@ -50,11 +45,6 @@ for(s in seq_along(siteData$siteName)[-6]){
       beforeGCC <- dataFinal$gcc[1:(round(tranDays[t],digits=0)-1),t]
       mdl_g <- lm(beforeGCC ~ seq_along(beforeGCC))
       print(mdl_g$coefficients[2])
-      # beforeP <- dataFinal$p[1:(round(tranDays[t],digits=0)-1),t]
-      # mdl_p <- lm(beforeP ~ seq_along(beforeP))
-      
-      # temp_before <- c(temp_before,mean(dataFinal$TairMu[((round(tranDays[t],digits=0)-14)):(round(tranDays[t],digits=0)-8),t]))
-      # temp_after <- c(temp_after,mean(dataFinal$TairMu[((round(tranDays[t],digits=0))-7):(round(tranDays[t],digits=0)-1),t]))
     }
     
     greenData[s,] <- c(siteName,dataFinal$N,mean(p_trans,na.rm=TRUE),sd(p_trans,na.rm=TRUE),mean(gcc_trans,na.rm=TRUE),sd(gcc_trans,na.rm=TRUE),
@@ -82,7 +72,7 @@ allRFDat <- matrix(nrow=0,ncol=8)
 for(s in (seq_along(siteData$siteName)[-6])){
   siteName <- siteData$siteName[s]
   print(siteName)
-  load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData")) #dataFinal <- rescaled p so I also need the original
+  load(paste0(dataDirectory,siteName,"_dataFinal.RData")) #dataFinal <- rescaled p so I also need the original
   load(file=paste0(dataDirectory,siteName,"_phenopixOutputs.RData"))
   
   tranID <- which(tranOffsets$siteName==siteName)

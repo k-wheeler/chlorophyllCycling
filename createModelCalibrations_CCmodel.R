@@ -6,8 +6,9 @@ library(runjags)
 library(suncalc)
 library(rnoaa)
 library(doParallel)
+source('generalVariables.R')
 
-createTriggerModelCalibration <- function(ns,sVals){
+createChlorophyllCyclingModelCalibration <- function(summerOnly=FALSE,ns,sVals){
   print(ns)
   generalModel = "
 model {
@@ -21,13 +22,9 @@ model {
     #### Process Model
     for(yr in 1:(N)){
     for(i in 2:n){
-    Tair[i,yr] ~ dnorm(TairMuFinal[i,yr],TairPrecFinal[i,yr])
+    Tair[i,yr] ~ dnorm(TairMu[i,yr],TairPrec[i,yr])
     
-    offsetRaw[i,yr] <- max(Tb-Tair[i,yr],0)
-    offset[i,yr] <- ifelse(D[i,yr]<Dstart,offsetRaw[i,yr],0)
-    CDD[i,yr] <- CDD[(i-1),yr] + offset[i,yr] * (D[i,yr]/Dstart)
-    xmu[i,yr] <- max(min((ifelse(CDD[i,yr]>CDDcrit,x[(i-1),yr] - summerRate, x[(i-1),yr] - fallRate)),x[1,yr]),0)
-
+    xmu[i,yr] <- max(min((x[(i-1),yr] + b4 * x[(i-1),yr]) + max(0,(b0 + b3 * Tair[i,yr] * D[i,yr])),x[1,yr]),0)
     x[i,yr] ~ dnorm(xmu[i,yr],p.proc)
     }
     }
@@ -35,48 +32,31 @@ model {
     #### Priors
     for(yr in 1:N){ ##Initial Conditions
     x[1,yr] ~ dbeta(x1.a[yr],x1.b[yr]) I(0.001,0.999)
-    CDD[1,yr] <- 0
     }
     p.PC ~ dgamma(s1.PC,s2.PC)
     p.proc ~ dgamma(s1.proc,s2.proc)
     
-    Dstart <- 15
-    CDDcrit ~ dunif(0,2000)
-    Tb <- 15
-    summerRate ~ dunif(0,1)
-    fallRate ~ dunif(0,1)
+    b0 ~ dunif(b0_lower,b0_upper)
+    b3 ~ dunif(b3_lower,b3_upper)
+    b4 ~ dunif(b4_lower,b4_upper)
     
-  }
-    "
+  }"
   
-  n.cores <- length(sVals)
   registerDoParallel(cores=n.cores)
-  
-  dataDirectory <- "data/"
-  siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
-  
-  sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
-             "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
-             "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","canadaOA","alligatorriver","readingma",
-             "bullshoals","thompsonfarm2N","ashburnham","shalehillsczo")
-  yearsRemoved <- c(2015,2010,2020,2015,2017,2015,2015,2010,2017,2019,2018,2017,
-                    2012,2019,2019,2010,2014,2015,2017,2018,2016,2011,2012,2019)
-  nchain=5
-  
-  variableNames <- c("p.PC","x","p.proc","CDDcrit","summerRate","fallRate")
+  variableNames <- c("p.PC","x","p.proc","b0","b3","b4")
   
   foreach(s =sVals) %dopar% {
     siteName <- sites[s]
     print(siteName)
     yearRemoved <- yearsRemoved[s]
-    load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
+    load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
     
     for(n in ns){
       print(n)
-      outputFileName <- paste0(siteName,"_meanTemp_summer",n,"basicTrigger_calibration_varBurn.RData")
-      
+      outputFileName <- paste0(CCmodelOutputsFolder,siteName,"_",n,"_ccModel_forecast_calibration_varBurn.RData")
       dataFinal$p[(n+1):nrow(dataFinal$p),] <- NA
-      
+
+      #Remove year
       yearInt <- which(dataFinal$years==yearRemoved)
       dataFinal$p[,yearInt] <- NA
       
@@ -85,21 +65,24 @@ model {
       dataFinal$s2.PC <- 0.016
       dataFinal$s1.proc <- 1.56
       dataFinal$s2.proc <- 0.016
+      dataFinal$b0_lower <- -1 #intercept of synthesis
+      dataFinal$b0_upper <- 1 #intercept of synthesis
       
-      dataFinal$TairMuFinal <- dataFinal$TairMu
-      dataFinal$TairPrecFinal <- dataFinal$TairPrec
+      dataFinal$b3_lower <- 0 #slope of synthesis
+      dataFinal$b3_upper <- 1
+      dataFinal$b4_lower <- -1 #Breakdown rate
+      dataFinal$b4_upper <- 0 #Breakdown rate
       
-      #save(file=initsFileName,inits) #Need to save inits for dic calculations
       j.model <- try(jags.model(file = textConnection(generalModel),
                                 data = dataFinal,
                                 n.chains = nchain,
-                                n.adapt = 1000))#Load Model Output 
+                                n.adapt = 3000))#Load Model Output 
       if(inherits(j.model,"try-error")){
         next
       }
       
       out.burn <- try(runForecastIter(j.model=j.model,variableNames=variableNames,
-                                      baseNum = 3000,iterSize = 1000,effSize = 1000, maxIter=1000000,
+                                      baseNum = 15000,iterSize = 5000,effSize = 5000, maxIter=1000000,
                                       partialFile = paste("partial_",outputFileName,sep="")))
       if(inherits(out.burn,"try-error")){
         next
@@ -118,7 +101,8 @@ model {
       print(paste("saved:",outputFileName))
     }
   }
+  
 }
 
-
-createTriggerModelCalibration(ns=182,sVals=1) #Change for number of included days (ns) and sites (sVals)
+createChlorophyllCyclingModelCalibration(ns=seq(45,183),
+                                         sVals=seq_along(sites)) #Change for number of included days (ns) and sites (sVals)

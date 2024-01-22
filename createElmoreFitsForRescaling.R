@@ -1,11 +1,12 @@
 library(phenopix)
 library(zoo)
 library(PhenoForecast)
+source('generalVariables.R')
 
 
 estimateDatesAndScale <- function(p,siteName,year){
   newP <- zoo(na.approx(p))
-  #out <- KlostermanFit(newP)
+
   out <- ElmoreFit(newP)
   output <- c(year,out$fit$sf)
   x=out$fit$predicted
@@ -13,11 +14,8 @@ estimateDatesAndScale <- function(p,siteName,year){
   output <- c(output,dts[4])
   xd <- c(NA,diff(x))
   xd2 <- c(NA,diff(xd))
-  #xd3 <- c(NA,diff(xd2))
   sof <- 200+which.min(xd2[200:length(xd2)])-3
-  #LastMax <- which.max(xd2[200:length(xd2)])
-  #sof <- 200+which.min(xd2[200:(200+LastMax)])-3
-  
+
   output <- c(output,sof)
   output <- c(output,
               which(out$fit$predicted[output[4]:365]<(output[3]-(output[3]-output[2])/2))[1])
@@ -77,16 +75,8 @@ calculateFits <- function(siteName,URLs,startDate,endDate,year){
   return(allDat)
 }
 
-#siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
-siteData <- read.csv('allPhenocamDBsitesComplete.csv',header=TRUE)
-badSiteYears <- read.csv('phenocamSitesBadYears.csv',header = FALSE)
-dataDirectory <- "data/"
-#endDate <- as.Date("2020-12-31")
-
 pdf(file="ChlorophyllCycling_AutumnForecastPreviousCurveElmoreFits.pdf",height=5,width=8)
 for(i in 1:nrow(siteData)){
-#for(i in 1:10){
-  #for(i in 1:5){
   siteName <- as.character(siteData[i,1])
   print(siteName)
   
@@ -104,6 +94,6 @@ for(i in 1:nrow(siteData)){
   URLs <- URL
   allDat <- calculateFits(siteName,URLs,startDate,endDate)
   allDat <- checkForPoorFits(allDat=allDat,siteName=siteName,badSiteYears=badSiteYears)
-  save(allDat,file=paste(dataDirectory,siteName,"_phenopixOutputs2.RData",sep=""))
+  save(allDat,file=paste0(dataDirectory,siteName,"_phenopixOutputs.RData"))
 }
 dev.off()

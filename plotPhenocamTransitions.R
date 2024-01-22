@@ -4,6 +4,7 @@ library(rjags)
 library(runjags)
 library(doParallel)
 library('ecoforecastR')
+source('generalVariables.R')
 
 changepointModel <- function(y1,mS,mF,k,xseq){
   yseq <- y1
@@ -17,18 +18,15 @@ changepointModel <- function(y1,mS,mF,k,xseq){
   return(yseq)
 }
 
-dataDirectory <- "data/"
-siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
 pdf(file="PhenoCam_transitionEstimates_updatedK.pdf",height=6,width=10)
 
 for(s in 1:nrow(siteData)){
   siteName <- as.character(siteData$siteName[s])
   print(siteName)
-  if(file.exists(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))){
-    load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
+  if(file.exists(paste0(dataDirectory,siteName,"_dataFinal.RData"))){
+    load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
     days <- seq(1,dataFinal$n)
     for(yr in 1:dataFinal$N){
-      #p <- dataFinal$p[dataFinal$p[,yr]>0.15,yr]
       if(length(which(dataFinal$p[,yr]<0.10))>0){
         p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.10)[1]-1),yr]
       }else{
@@ -36,7 +34,7 @@ for(s in 1:nrow(siteData)){
       }
       yrName <- dataFinal$years[yr]
       print(yrName)
-      p.file <- paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn_updatedK.RData")
+      p.file <- paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData")
       plot(days,dataFinal$p[,yr],pch=20,main=paste(siteName,yrName))
       abline(h=0.15,col="red")
       

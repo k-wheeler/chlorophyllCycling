@@ -3,26 +3,19 @@ library('runjags')
 library('ecoforecastR')
 library('RColorBrewer')
 library('scoringRules')
-dataDirectory <- "data/"
+source('generalVariables.R')
 options(stringsAsFactors = FALSE)
-
-sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
-           "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
-           "bartlettir","oakridge1","alligatorriver","readingma","bullshoals",
-           "willowcreek","downerwoods","laurentides","russellsage","sanford","boundarywaters") ##Calibration Sites 
 
 output <- matrix(nrow=length(sites),ncol=7)
 for(s in seq_along(sites)){
   #for(s in 1:1){
   siteName <- sites[s]
   print(siteName)
-  load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
+  load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
   n=183
   
-  fileName <- paste0('finalVarBurns/',siteName,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
-  
+  fileName <- paste0(CCmodelOutputsFolder,siteName,"_",n,"_ccModel_forecast_calibration_varBurn.RData")
   load(fileName) #Load Model Output 
-  
   
   out.mat <- data.frame(as.matrix(out.burn$params))
   

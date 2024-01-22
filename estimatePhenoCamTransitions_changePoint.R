@@ -3,6 +3,7 @@ library(PhenologyBayesModeling)
 library(rjags)
 library(runjags)
 library(doParallel)
+source('generalVariables.R')
 
 ##' Create a Bayes Model for a deciduous broadleaf site
 ##'
@@ -53,27 +54,19 @@ createChangepointModel_Fall <- function(yobs) {
   return(j.model)
 }
 
-#n.cores <- 16
-
 #register the cores.
-#registerDoParallel(cores=n.cores)
+registerDoParallel(cores=n.cores)
 
-dataDirectory <- "data/"
-siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
-siteName <- "russellsage"
-yr=2
-#for(s in 1:nrow(siteData)){
-#foreach(s=nrow(siteData):1) %dopar% {
-#  siteName <- as.character(siteData$siteName[s])
+foreach(s=1:nrow(siteData):1) %dopar% {
+  siteName <- as.character(siteData$siteName[s])
   print(siteName)
   
-  load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
+  load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
   
-  #foreach(yr=1:dataFinal$N) %dopar% {
   for(yr in 1:dataFinal$N){
     yrName <- dataFinal$years[yr]
     print(yrName)
-    if(!file.exists(paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn_updatedK.RData"))){
+    if(!file.exists(paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))){
       #p <- dataFinal$p[dataFinal$p[,yr]>0.15,yr]
       if(length(which(dataFinal$p[,yr]<0.15))>0){
         p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.15)[1]-1),yr]
@@ -90,9 +83,9 @@ yr=2
         thinAmount <- round(nrow(out.mat)/5000,digits=0)
         var.burn <- window(var.burn,thin=thinAmount)
       }
-      save(var.burn,file=paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn_updatedK.RData"))
+      save(var.burn,file=paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
     }else{
-      load(paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
+      load((paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData")))
       if(typeof(var.burn)==typeof(FALSE)){
         if(length(which(dataFinal$p[,yr]<0.10))>0){
           p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.10)[1]-1),yr]
@@ -109,8 +102,8 @@ yr=2
           thinAmount <- round(nrow(out.mat)/5000,digits=0)
           var.burn <- window(var.burn,thin=thinAmount)
         }
-        save(var.burn,file=paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn_updatedK.RData"))
+        save(var.burn,file=(paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData")))
       }
     }
   }
-#}
+}

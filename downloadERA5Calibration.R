@@ -1,17 +1,13 @@
 library("reticulate")
 library(doParallel)
+source('generalVariables.R')
 n.cores <- 24
 
 #register the cores.
 registerDoParallel(cores=n.cores)
-setwd("/projectnb/dietzelab/kiwheel/ERA5")
 
-siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
-
-cdsapi <- reticulate::import("cdsapi")
+cdsapi <- reticulate::import("cdsapi") #Need to install separately so you can interact with api
 cclient <- cdsapi$Client()
-
-#end_date=as.Date("2020-12-31")
 
 variables <- tibble::tribble(
   ~cf_name, ~units, ~api_name, ~ncdf_name,
@@ -25,17 +21,11 @@ variables <- tibble::tribble(
   "surface_downwelling_longwave_flux_in_air", "W/m2", "surface_thermal_radiation_downwards", NA_character_
 )
 
-var <- variables[["api_name"]][[1]]#4
-foreach(i=75:nrow(siteData)) %dopar% {
-  #for(i in 1:nrow(siteData)){
-  #i <- 1
+var <- variables[["api_name"]][[1]] #Only Download Air temperature
+foreach(i=1:nrow(siteData)) %dopar% {
   siteName <- as.character(siteData$siteName[i])
   print(siteName)
-  outfolder <- paste("Data/",siteName,sep="")
-  if(!dir.exists((outfolder))){
-    dir.create(outfolder)
-    print(paste("Created Folder:",outfolder))
-  }
+
   lat <- as.numeric(siteData$Lat[i])
   long <- as.numeric(siteData$Long[i])
   start_date <- as.Date(siteData$startDate[i])
@@ -43,8 +33,8 @@ foreach(i=75:nrow(siteData)) %dopar% {
   
   area <- rep(round(c(lat, long) * 4) / 4, 2)
   
-  fname <- file.path(outfolder, paste(siteName,"_",start_date,"_",end_date,"_era5TemperatureMembers.nc", sep =""))
-  #fname <- file.path(outfolder, paste(siteName,"_",start_date,"_",end_date,"_era5PrecipitationMembers.nc", sep =""))
+  fname <- file.path(ERAdataFolder, paste0(siteName,"_",start_date,"_",end_date,"_era5TemperatureMembers.nc"))
+
   if(!file.exists(fname)){
     do_next <- tryCatch({
       cclient$retrieve(
@@ -67,6 +57,3 @@ foreach(i=75:nrow(siteData)) %dopar% {
     })
   }
 }
-
-
-
