@@ -19,6 +19,8 @@ estimateDatesAndScale <- function(p,siteName,year){
   #sof <- 200+which.min(xd2[200:(200+LastMax)])-3
   
   output <- c(output,sof)
+  output <- c(output,
+              which(out$fit$predicted[output[4]:365]<(output[3]-(output[3]-output[2])/2))[1])
   PhenoPlot(out,metrics="GCC",main=paste(siteName,year))
   points(newP,col="green",pch=20)
   abline(v=output[c(4,5)],col="red")
@@ -26,7 +28,7 @@ estimateDatesAndScale <- function(p,siteName,year){
 }
 checkForPoorFits <- function(siteName,allDat,badSiteYears){ #Based on visual expection of years
   yrs <- na.omit(as.numeric(badSiteYears[badSiteYears[,1]==siteName,][2:ncol(badSiteYears)]))
-  allDat[allDat[,'Year'] %in% yrs,2:5] <- c(NA,NA,NA,NA)
+  allDat[allDat[,'Year'] %in% yrs,2:6] <- c(NA,NA,NA,NA,NA)
   return(allDat)
 }
 
@@ -62,7 +64,7 @@ calculateFits <- function(siteName,URLs,startDate,endDate,year){
   dat2 <- data.frame(dates=days,years=years,months=months,p=p)
   
   dat2 <- dat2[as.numeric(format(dat2$dates,"%j"))%in% seq(1,365),] #Remove final day in leap years
-  allDat <- matrix(nrow=0,ncol=5)
+  allDat <- matrix(nrow=0,ncol=6)
   
   for(i in (lubridate::year(as.Date(dat2$dates[1]))):lubridate::year(as.Date(dat2$dates[length(dat2$dates)]))){##I know this includes the forecasted stuff, but it shouldn't really matter because of the JAGS model setup
     print(i)
@@ -71,7 +73,7 @@ calculateFits <- function(siteName,URLs,startDate,endDate,year){
       allDat <- rbind(allDat,estimateDatesAndScale(p=subDat$p,siteName,year=i))
     }
   }
-  colnames(allDat) <- c("Year","Low","High","PeakDay","FallStartDay")
+  colnames(allDat) <- c("Year","Low","High","PeakDay","FallStartDay","perc50Day")
   return(allDat)
 }
 
@@ -102,6 +104,6 @@ for(i in 1:nrow(siteData)){
   URLs <- URL
   allDat <- calculateFits(siteName,URLs,startDate,endDate)
   allDat <- checkForPoorFits(allDat=allDat,siteName=siteName,badSiteYears=badSiteYears)
-  save(allDat,file=paste(dataDirectory,siteName,"_phenopixOutputs.RData",sep=""))
+  save(allDat,file=paste(dataDirectory,siteName,"_phenopixOutputs2.RData",sep=""))
 }
 dev.off()

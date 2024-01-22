@@ -14,6 +14,7 @@ sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
            "willowcreek","downerwoods","laurentides","russellsage","sanford","boundarywaters") ##Calibration Sites 
 
 siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
+
 tranOffsets <- read.csv('phenocamTransitions_fromMeanFiltered.csv',header=TRUE)
 cutOff <- -0.02 #Cut-off For the value of second-differences that constitutes an inflection based off of PhenoCam data
 NT <- 184
@@ -138,7 +139,7 @@ for(i in 1:5){
 
     points(dates,includeP,col=col.alpha("black",1),pch=19,cex=0.75)
     
-    points(dates,excludeP,col=col.alpha("red",1),pch=17,cex=0.75)
+    points(dates,excludeP,col=col.alpha("red",1),pch=19,cex=0.75)
     if(i==1){
       #ecoforecastR::ciEnvelope(dates[369:length(dates)],ci[1,],ci[3,],col=col.alpha("blue",0.50))
       ecoforecastR::ciEnvelope(dates[c(seq(1,4*184),seq((5*184+1),(10*184)))],ci[1,],ci[3,],col=col.alpha("blue",0.50))
