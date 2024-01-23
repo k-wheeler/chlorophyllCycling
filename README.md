@@ -15,7 +15,7 @@ Note: In this code, the parameter values of b0, b3, and b4 correspond to b0, b1,
 #Prepping Data
 * downloadERA5Calibration.R #Downloads ERA5 data for selected sites. You need to have the api set up to do this. 
 
-*downloadPhenocam.R #Downloaded phenocam gcc data based off of URLS in site data file
+* downloadPhenocam.R #Downloaded phenocam gcc data based off of URLS in site data file
 
 * load_ERA5.R #Files to load ERA5 met data from the saved files. 
 
