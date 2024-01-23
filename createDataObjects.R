@@ -1,14 +1,10 @@
 ##Script to create consolidated data objects (dataFinal)
-library(PhenoForecast) #From github: k-wheeler/NEFI_pheno/PhenoForecast
-library(PhenologyBayesModeling) #From github: k-wheeler/NEFI_pheno/PhenologyBayesModeling 
-library(rjags)
-library(runjags)
 library(suncalc)
-library(rnoaa)
 library(doParallel)
 library(ncdf4)
 source('load_ERA5.R')
 source('generalVariables.R')
+source('downloadPhenocam.R')
 
 #register the cores.
 registerDoParallel(cores=n.cores)

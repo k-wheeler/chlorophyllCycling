@@ -1,9 +1,6 @@
-library(PhenoForecast)
-library(PhenologyBayesModeling)
 library(rjags)
 library(runjags)
 library(doParallel)
-library('ecoforecastR')
 source('generalVariables.R')
 
 dataDirectory <- "data/"

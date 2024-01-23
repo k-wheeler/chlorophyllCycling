@@ -1,16 +1,14 @@
-library(PhenoForecast)
-library(PhenologyBayesModeling)
 library(rjags)
 library(runjags)
 library(doParallel)
 source('generalVariables.R')
+source('runModelIterations.R')
 
 ##' Create a Bayes Model for a deciduous broadleaf site
 ##'
 ##' @param yobs
 ##' @import rjags
 ##' @import runjags
-##' @import PhenologyBayesModeling
 ##' @export
 createChangepointModel_Fall <- function(yobs) {
   nchain = 5
@@ -67,7 +65,6 @@ foreach(s=1:nrow(siteData):1) %dopar% {
     yrName <- dataFinal$years[yr]
     print(yrName)
     if(!file.exists(paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))){
-      #p <- dataFinal$p[dataFinal$p[,yr]>0.15,yr]
       if(length(which(dataFinal$p[,yr]<0.15))>0){
         p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.15)[1]-1),yr]
       }else{

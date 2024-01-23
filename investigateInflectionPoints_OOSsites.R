@@ -1,17 +1,15 @@
 library('rjags')
 library('runjags')
-library('ecoforecastR')
 library('RColorBrewer')
 library(doParallel)
 source('generalVariables.R')
+
 
 #Create forecast step model:
 #' Basic logistic forecast step
 #'
 #' @param IC Initial conditions
 #' @param b0 The parameter b0
-#' @param b1 The parameter b1
-#' @param b2 The parameter b2
 #' @param b3 The parameter b3
 #' @param b4 The parameter b4
 #' @param b5 The parameter b5
@@ -22,7 +20,6 @@ source('generalVariables.R')
 #' @param D
 #' @import rjags
 #' @import runjags
-#' @import ecoforecastR
 #'
 #' @return
 #' @export

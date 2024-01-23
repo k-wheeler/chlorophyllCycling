@@ -1,8 +1,5 @@
 library('rjags')
 library('runjags')
-library('ecoforecastR')
-library('RColorBrewer')
-library('scoringRules')
 source('generalVariables.R')
 options(stringsAsFactors = FALSE)
 

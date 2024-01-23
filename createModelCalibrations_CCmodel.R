@@ -1,14 +1,11 @@
 ##Create Calibration Fits for mean air temperature no trigger model
-library(PhenoForecast)
-library(PhenologyBayesModeling)
 library(rjags)
 library(runjags)
-library(suncalc)
-library(rnoaa)
 library(doParallel)
 source('generalVariables.R')
+source('runModelIterations.R')
 
-createChlorophyllCyclingModelCalibration <- function(summerOnly=FALSE,ns,sVals){
+createChlorophyllCyclingModelCalibration <- function(ns,sVals){
   print(ns)
   generalModel = "
 model {
@@ -82,8 +79,7 @@ model {
       }
       
       out.burn <- try(runForecastIter(j.model=j.model,variableNames=variableNames,
-                                      baseNum = 15000,iterSize = 5000,effSize = 5000, maxIter=1000000,
-                                      partialFile = paste("partial_",outputFileName,sep="")))
+                                      baseNum = 15000,iterSize = 5000,effSize = 5000, maxIter=1000000))
       if(inherits(out.burn,"try-error")){
         next
       }

@@ -26,14 +26,3 @@ daysOffsetFile <- "daysOffset_includedVsDay.RData"
 
 n.cores <- 8 #Number of cores available for parallelization
 nchain=5
-
-#General File Names:
-#ERA5 data name: paste0(ERAdataFolder,siteName,"_",start_date,"_",end_date,"_era5TemperatureMembers.nc")
-#Rescaled parameters: file=paste0(dataDirectory,siteName,"_phenopixOutputs.RData"))
-#Data Objects: file=(paste0(dataDirectory,siteName,"_dataFinal.RData"))
-#Changepoint model outputs to estimate date of inflection: paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData")
-#Climatology model outputs: paste0(climatologyModelOutputsFolder,siteName,"_climatology_forecast_calibration_varBurn.RData")
-#CC model outputs: paste0(CCmodelOutputsFolder,siteName,"_",n,"_ccModel_forecast_calibration_varBurn.RData")
-#CRPS values of out of sample predictions:paste0("outOfSampleSites_crps_",calSite,"_183.csv")
-#Inflection for calibration sites: paste0(siteName,"_inflectionPointData_15.RData"))
-#Inflection for out of sample predictions: paste0(calSite,"_inflectionPointData_OOSsites_mean15_",n,".RData")

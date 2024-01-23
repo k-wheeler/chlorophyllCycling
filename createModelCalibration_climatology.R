@@ -1,12 +1,9 @@
 ##Create Calibration Fits for mean air temperature no trigger model
-library(PhenoForecast)
-library(PhenologyBayesModeling)
 library(rjags)
 library(runjags)
-library(suncalc)
-library(rnoaa)
 library(doParallel)
 source('generalVariables.R')
+source('runModelIterations.R')
 
 registerDoParallel(cores=n.cores)
 

@@ -5,7 +5,7 @@ library(tidyverse)
 library(randomForest)
 library(caTools)
 library(tidyverse)
-source('generalVariables')
+source('generalVariables.R')
 
 tranOffsets = read.csv(allPhenoTranFile,header=TRUE)
 tranOffsets$meanDOY <- tranOffsets$meanDOY - 181

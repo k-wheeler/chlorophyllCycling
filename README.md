@@ -5,46 +5,87 @@ This document contains the names and descriptions of the different R scrips in t
 
 Email: kwheelerecology@gmail.com
 
-The organization of the scrips and this document as still in progress to make clearer before publications. So we apologize if things break or unclear still. 
+The scripts require a site data csv file where the columns are siteName (PhenoCam's sitename), Lat, Long, URL (URL of data archive on PhenoCam site for specific site and ROI), PFT (i.e., DB), TZ (offset from GMT, e.g., -5 for ET), startDate (first date of full year of data, e.g., "2013-01-01"), URL2 (additional PhenoCam URL if switched cameras/ROI), URL3, endDate
 
-Some of the scripts need functions from some of my R packages on github, specifically: 
-library(PhenoForecast) #From github: k-wheeler/NEFI_pheno/PhenoForecast
-library(PhenologyBayesModeling) #From github: k-wheeler/NEFI_pheno/PhenologyBayesModeling 
-library(ecoforecastR) #From github: EcoForecast/ecoforecastR
+In order to run code on your computer, file paths should be changed in the generalVariables.R file. This file also has other general variables and is sourced in all other R scripts. 
 
-Some of the scripts rely on reading in a csv file of site characteristics: read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
-This is a csv where the columns are siteName (PhenoCam's sitename), Lat, Long, URL (URL of data archive on PhenoCam site for specific site and ROI), PFT (i.e., DB), TZ (offset from GMT, e.g., -5 for ET), startDate (first date of full year of data, e.g., "2013-01-01"), URL2 (additional PhenoCam URL if switched cameras/ROI), URL3, endDate
+Note: In this code, the parameter values of b0, b3, and b4 correspond to b0, b1, and -1*b2 in the manuscript
+
 
 #Prepping Data
-downloadERA5Calibration.R #Downloads ERA5 data for selected sites. You need to have the api set up to do this. 
-load_ERA5.R #Files to load ERA5 met data from the saved files. 
+* downloadERA5Calibration.R #Downloads ERA5 data for selected sites. You need to have the api set up to do this. 
 
-createElmoreFitsForRescaling.R #Saves R object for each site with rescaling info as file=paste(dataDirectory,siteName,"_phenopixOutputs.RData",sep="")
+*downloadPhenocam.R #Downloaded phenocam gcc data based off of URLS in site data file
 
-createDataObjects #Saves comprehensive data objects for each site as: file=paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
+* load_ERA5.R #Files to load ERA5 met data from the saved files. 
+
+* createElmoreFitsForRescaling.R #Saves R object for each site with rescaling info as file=paste0(dataDirectory,siteName,"_phenopixOutputs.RData"))
+
+* createDataObjects #Saves comprehensive data objects for each site as: file=(paste0(dataDirectory,siteName,"_dataFinal.RData"))
 
 
 #Calculates PhenoCam Transition Dates
-estimatePhenoCamTransitions_changePoint.R #Fits changepoint Bayesian model to PhenoCam data to estimate start of senescence transition dates and stores the model fits in the file file=paste0('varBurns/',siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn_updatedK.RData")) to be used below 
-calculatePhenoCamTransitionsFromMean.R #Combines calculated PhenoCam SOS transition dates into one file: "phenocamTransitions_fromMeanFiltered.csv"
+* estimatePhenoCamTransitions_changePoint.R #Fits changepoint Bayesian model to PhenoCam data to estimate start of senescence transition dates and stores the model fits in the file = paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData") to be used below 
+
+* calculatePhenoCamTransitionsFromMean.R #Combines calculated PhenoCam SOS transition dates into one file: "phenocamTransitions_fromMeanFiltered.csv"
+
 
 #Fit Models
-createModelCalibration_climatology.R #Creates historical average null model fits 
-createModelCalibrations_forecasts.R #Calibrates model to defined sites and number of included day of years
+* runModelIterations.R #Includes two functions to iteratively run below models until convergence is reached with large enough effective sample sizes
+
+* createModelCalibration_climatology.R #Creates historical average null model fits that are saved in file=paste0(climatologyModelOutputsFolder,siteName,"_climatology_forecast_calibration_varBurn.RData")
+
+* createModelCalibrations_CCmodel.R #Calibrates chlorophyll cycling model to defined sites and number of included day of years and saves it each in file=paste0(CCmodelOutputsFolder,siteName,"_",n,"_ccModel_forecast_calibration_varBurn.RData")
+
+* createModelCalibrations_triggerModel.R #STILL IN DEVELOPMENT
+
 
 #Validation site predictions
-uncertaintyAnalysisHindcasts_allSites.R #Validation site predictions for each calibration site 
+* uncertaintyAnalysisHindcasts_allSites.R #Validation site predictions for each calibration site 
 
 #Fit Plots
-plotClimatologyFits.R #Plots the historical averages model fits
-plotHindcast_forecasts.R #Plots the model fits for various amounts of included data and for specified sites 
-plotPhenocamTransitions.R #Plots the estimated PhenoCam transitions 
+* plotClimatologyFits.R #Plots the historical averages model fits
+
+* plotHindcast_forecasts.R #Plots the model fits for various amounts of included data and for specified sites 
+
+* plotPhenocamTransitions.R #Plots the estimated PhenoCam transitions 
 
 #Analyses
-investigateInflectionPoints.R #Determines if inflection was met
-investigateInflectionPoints_OOSsites.R #Determines if inflection was met in out of sample sites 
-createCRPSpercentageMatrix.R #Creates a matrix of % site-years where our model is better than climatology over differing amounts of included data for Fig. 3c
+* investigateInflectionPoints.R #Determines if inflection was met and saves each in file=paste0(siteName,"_inflectionPointData_15.RData"))
 
-createManuscriptFiguresFINAL.R #File to create figures for the manuscript. Figures were further edited elsewhere. 
+* investigateInflectionPoints_OOSsites.R #Determines if inflection was met in out of sample sites and saves each in file=paste0(calSite,"_inflectionPointData_OOSsites_mean15_",n,".RData")
+
+* createCRPSpercentageMatrix.R #Creates a matrix of % site-years where our model is better than climatology over differing amounts of included data for Fig. 3c and creates files "crpsMat_includedVsDay_Complete.RData", "reorganizedDat_includedVsDay.RData", and "daysOffset_includedVsDay.RData"
+
+* testingImportanceOfTiming.R #Still in Development
 
 
+#Create Figures
+* createManuscriptFiguresFINAL.R #File to create figures for the manuscript. Figures were further edited elsewhere. 
+
+* createCalibrationParameterTable.R #Creates supplementary table of parameter values for each calibration site
+
+
+#Extra
+* ciEnvelope.R #Function to plot credible interval polygon on figures
+
+
+The file naming structure is below: 
+
+* ERA5 data name: paste0(ERAdataFolder,siteName,"_",start_date,"_",end_date,"_era5TemperatureMembers.nc")
+
+* Rescaled parameters: file=paste0(dataDirectory,siteName,"_phenopixOutputs.RData"))
+
+* Data Objects: file=(paste0(dataDirectory,siteName,"_dataFinal.RData"))
+
+* Changepoint model outputs to estimate date of inflection: paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData")
+
+* Climatology model outputs: paste0(climatologyModelOutputsFolder,siteName,"_climatology_forecast_calibration_varBurn.RData")
+
+* CC model outputs: paste0(CCmodelOutputsFolder,siteName,"_",n,"_ccModel_forecast_calibration_varBurn.RData")
+
+* CRPS values of out of sample predictions:paste0("outOfSampleSites_crps_",calSite,"_183.csv")
+
+* Inflection for calibration sites: paste0(siteName,"_inflectionPointData_15.RData"))
+
+* Inflection for out of sample predictions: paste0(calSite,"_inflectionPointData_OOSsites_mean15_",n,".RData")

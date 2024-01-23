@@ -2,11 +2,12 @@
 #General Library and Data Loading ----
 library('rjags')
 library('runjags')
-library('ecoforecastR')
 library('RColorBrewer')
 library('scoringRules')
 library('scales')
 source('generalVariables.R')
+source('ciEnvelope.R')
+source('downloadPhenocam.R')
 
 tranOffsets <- read.csv(allPhenoTranFile,header=TRUE)
 cutOff <- -0.02 #Cut-off For the value of second-differences that constitutes an inflection based off of PhenoCam data
@@ -34,7 +35,6 @@ calculateStart <- function(ys,avgNum=10){
 }
 
 ##Supplementary Figure to show names of different parts of the curve ----
-library(PhenologyBayesModeling)
 URL <- "http://phenocam.sr.unh.edu/data/archive/harvard/ROI/harvard_DB_0001_1day.csv"
 phenoDataSub <- download.phenocam(URL)
 
@@ -122,13 +122,13 @@ for(i in 1:5){
     
     points(dates,excludeP,col=col.alpha("red",1),pch=19,cex=0.75)
     if(i==1){
-      ecoforecastR::ciEnvelope(dates[c(seq(1,4*184),seq((5*184+1),(10*184)))],ci[1,],ci[3,],col=col.alpha("blue",0.50))
+      ciEnvelope(dates[c(seq(1,4*184),seq((5*184+1),(10*184)))],ci[1,],ci[3,],col=col.alpha("blue",0.50))
       polygon(x=c((4*184),(4*184),(5*184),(5*184)),c(0,1.2,1.2,0),col="white",border=NA)
     }else if(i==2){
-      ecoforecastR::ciEnvelope(dates[c(seq((2*184+1),(7*184)),seq((8*184+1),(10*184)))],ci[1,],ci[3,],col=col.alpha("blue",0.50))
+      ciEnvelope(dates[c(seq((2*184+1),(7*184)),seq((8*184+1),(10*184)))],ci[1,],ci[3,],col=col.alpha("blue",0.50))
       polygon(x=c((7*184),(7*184),(8*184),(8*184)),c(0,1.2,1.2,0),col="white",border=NA)
     }else if(i == 3 | i==4){
-      ecoforecastR::ciEnvelope(dates[737:length(dates)],ci[1,],ci[3,],col=col.alpha("blue",0.50))
+      ciEnvelope(dates[737:length(dates)],ci[1,],ci[3,],col=col.alpha("blue",0.50))
     }
   }else{
     plot(dates,rep(NA,length(dates)),pch=20,xlab="Date",ylim=c(0,1),ylab="",
@@ -142,7 +142,7 @@ for(i in 1:5){
     excludeP <- dataFinal$p
     excludeP[1:n,-yearInt] <- NA
     points(dates,excludeP,col=col.alpha("red",1),pch=17,cex=0.75)
-    ecoforecastR::ciEnvelope(dates[369:length(dates)],ci[1,],ci[3,],col=col.alpha("blue",0.50))
+    ciEnvelope(dates[369:length(dates)],ci[1,],ci[3,],col=col.alpha("blue",0.50))
   }
   axis(side=2,at=c(0,0.2,0.4,0.6,0.8,1.0),labels=seq(0,1,0.2),pos=-1,cex=2,cex.axis=1.5)
   if(i==3){
@@ -502,7 +502,7 @@ for(rnd in 3:5){
   
   plot(numeric(),numeric(),ylim=ylimVals,xlim=c(-125,100),cex.axis=2,bty="n",ylab="",
        main="All Site-Years",cex.main=2,xlab="")
-  ecoforecastR::ciEnvelope(daysOffset[!is.na(ciTop)],as.numeric(na.omit(ciBot)),as.numeric(na.omit(ciTop)),col="gray")
+  ciEnvelope(daysOffset[!is.na(ciTop)],as.numeric(na.omit(ciBot)),as.numeric(na.omit(ciTop)),col="gray")
   abline(h=hLine,col="black",lty=2,lwd=2)
   lines(daysOffset,mns,col="blue",lwd=3)
   
@@ -529,7 +529,7 @@ for(rnd in 3:5){
     
     plot(numeric(),numeric(),ylim=ylimVals,xlim=c(-125,100),cex.axis=2,bty="n",ylab="",
          main="Transition Earlier Than Average",cex.main=2,xlab="")
-    ecoforecastR::ciEnvelope(daysOffset[!is.na(ciTop)],as.numeric(na.omit(ciBot)),as.numeric(na.omit(ciTop)),col="gray")
+    ciEnvelope(daysOffset[!is.na(ciTop)],as.numeric(na.omit(ciBot)),as.numeric(na.omit(ciTop)),col="gray")
     abline(h=hLine,col="black",lty=2,lwd=2)
     lines(daysOffset,mns,col="blue",lwd=3)
     
@@ -556,7 +556,7 @@ for(rnd in 3:5){
     
     plot(numeric(),numeric(),ylim=ylimVals,xlim=c(-125,100),cex.axis=2,bty="n",ylab="",
          main="Transition Later Than Average",cex.main=2,xlab="")
-    ecoforecastR::ciEnvelope(daysOffset[!is.na(ciTop)],as.numeric(na.omit(ciBot)),as.numeric(na.omit(ciTop)),col="gray")
+    ciEnvelope(daysOffset[!is.na(ciTop)],as.numeric(na.omit(ciBot)),as.numeric(na.omit(ciTop)),col="gray")
     abline(h=hLine,col="black",lty=2,lwd=2)
     lines(daysOffset,mns,col="blue",lwd=3)
   }
@@ -717,7 +717,6 @@ output <- output[order(as.numeric(output[,2]),decreasing = TRUE),]
 write.csv(output,file="transferabilityPercentBetter.csv",row.names=FALSE,quote=FALSE)
 
 #Supplementary Figure: Boston Common Time-series Examples and Fits ----
-library(PhenologyBayesModeling)
 siteName <- "bostoncommon"
 load(paste0(dataDirectory,siteName,"_dataFinal.RData")) #Load Data
 

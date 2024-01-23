@@ -1,7 +1,6 @@
 ###Paper Figures
 library('rjags')
 library('runjags')
-library('ecoforecastR')
 library('RColorBrewer')
 library('scoringRules')
 source('generalVariables')

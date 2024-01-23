@@ -1,9 +1,9 @@
 library('rjags')
 library('runjags')
-library('ecoforecastR')
 library('RColorBrewer')
-library(scoringRules)
-library('generalVariables.R')
+library('scoringRules')
+source('generalVariables.R')
+source('ciEnvelope.R')
 
 Nmc <- 5000
 
@@ -34,7 +34,7 @@ for(s in 1:nrow(siteData)){
     ci = apply(pred.mat,2,quantile,c(0.025,0.5,0.975))
     
     plot(seq(1,length(dataFinal$p)),dataFinal$p,pch=20,main=paste0(siteName," Climatology"),ylim=c(0,1),xlim=c(0,2500),xlab="Day",ylab="GCC")
-    ecoforecastR::ciEnvelope(seq(1,length(dataFinal$p)),ci[1,],ci[3,],col=col.alpha("blue",0.5))
+    ciEnvelope(seq(1,length(dataFinal$p)),ci[1,],ci[3,],col=col.alpha("blue",0.5))
     points(seq(1,length(dataFinal$p)),dataFinal$p,pch=20,col="red")
     includeP <- dataFinal$p
     includeP[,yearInt] <- NA

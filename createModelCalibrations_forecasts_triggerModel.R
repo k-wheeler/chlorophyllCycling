@@ -6,6 +6,7 @@ library(runjags)
 library(suncalc)
 library(rnoaa)
 library(doParallel)
+source('generalVariables.R')
 
 createTriggerModelCalibration <- function(ns,sVals){
   print(ns)
@@ -21,9 +22,9 @@ model {
     #### Process Model
     for(yr in 1:(N)){
     for(i in 2:n){
-    Tair[i,yr] ~ dnorm(TairMuFinal[i,yr],TairPrecFinal[i,yr])
+    #Tair[i,yr] ~ dnorm(TairMu[i,yr],TairPrec[i,yr])
     
-    offsetRaw[i,yr] <- max(Tb-Tair[i,yr],0)
+    offsetRaw[i,yr] <- max(Tb-TairMu[i,yr],0)
     offset[i,yr] <- ifelse(D[i,yr]<Dstart,offsetRaw[i,yr],0)
     CDD[i,yr] <- CDD[(i-1),yr] + offset[i,yr] * (D[i,yr]/Dstart)
     xmu[i,yr] <- max(min((ifelse(CDD[i,yr]>CDDcrit,x[(i-1),yr] - summerRate, x[(i-1),yr] - fallRate)),x[1,yr]),0)
@@ -42,38 +43,26 @@ model {
     
     Dstart <- 15
     CDDcrit ~ dunif(0,2000)
-    Tb <- 15
-    summerRate ~ dunif(0,1)
+    Tb <- 20
+    summerRate <- 0.002 #~ dunif(0,1)
     fallRate ~ dunif(0,1)
     
   }
     "
-  
-  n.cores <- length(sVals)
+
   registerDoParallel(cores=n.cores)
   
-  dataDirectory <- "data/"
-  siteData <- read.csv('/projectnb/dietzelab/kiwheel/chlorophyllCycling/allPhenocamDBsitesComplete.csv',header=TRUE)
-  
-  sites <- c("harvard","umichbiological","bostoncommon","coweeta","howland2",
-             "morganmonroe","missouriozarks","queens","dukehw","lacclair","bbc1","NEON.D08.DELA.DP1.00033",
-             "arbutuslake","bartlettir","proctor","oakridge1","hubbardbrook","canadaOA","alligatorriver","readingma",
-             "bullshoals","thompsonfarm2N","ashburnham","shalehillsczo")
-  yearsRemoved <- c(2015,2010,2020,2015,2017,2015,2015,2010,2017,2019,2018,2017,
-                    2012,2019,2019,2010,2014,2015,2017,2018,2016,2011,2012,2019)
-  nchain=5
-  
-  variableNames <- c("p.PC","x","p.proc","CDDcrit","summerRate","fallRate")
+  variableNames <- c("p.PC","x","p.proc","CDDcrit","fallRate")
   
   foreach(s =sVals) %dopar% {
     siteName <- sites[s]
     print(siteName)
     yearRemoved <- yearsRemoved[s]
-    load(paste0(dataDirectory,siteName,"_dataFinal_includeJuly.RData"))
+    load(paste0(dataDirectory,siteName,"_dataFinal.RData"))
     
     for(n in ns){
       print(n)
-      outputFileName <- paste0(siteName,"_meanTemp_summer",n,"basicTrigger_calibration_varBurn.RData")
+      outputFileName <- paste0(siteName,"_",n,"basicTrigger_calibration_varBurn.RData")
       
       dataFinal$p[(n+1):nrow(dataFinal$p),] <- NA
       
@@ -85,9 +74,6 @@ model {
       dataFinal$s2.PC <- 0.016
       dataFinal$s1.proc <- 1.56
       dataFinal$s2.proc <- 0.016
-      
-      dataFinal$TairMuFinal <- dataFinal$TairMu
-      dataFinal$TairPrecFinal <- dataFinal$TairPrec
       
       #save(file=initsFileName,inits) #Need to save inits for dic calculations
       j.model <- try(jags.model(file = textConnection(generalModel),

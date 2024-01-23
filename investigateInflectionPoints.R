@@ -1,6 +1,5 @@
 library('rjags')
 library('runjags')
-library('ecoforecastR')
 library('RColorBrewer')
 library(doParallel)
 source('generalVariables.R')

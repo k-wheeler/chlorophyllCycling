@@ -1,11 +1,10 @@
 library('rjags')
 library('runjags')
-library('ecoforecastR')
 library('RColorBrewer')
-library(scoringRules)
-
+library('scoringRules')
 library(doParallel)
 source('generalVariables.R')
+source('ciEnvelope.R')
 
 registerDoParallel(cores=n.cores)
 
@@ -24,7 +23,6 @@ registerDoParallel(cores=n.cores)
 #' @param D
 #' @import rjags
 #' @import runjags
-#' @import ecoforecastR
 #'
 #' @return
 #' @export
@@ -118,12 +116,12 @@ uncertaintyAnalysisHindcast_expBreak <- function(calSite,n=183){
       
       initialXs <- rbeta(Nmc,dataFinal$x1.a[1],dataFinal$x1.b[1])
 
-      ysPred <- forecastStep(IC=initialXs,b0=b0,b1=b1,b2=b2,b3=b3,b4=b4,
+      ysPred <- forecastStep(IC=initialXs,b0=b0,b3=b3,b4=b4,
                              n=Nmc,NT=NT,Tair=dataFinal$TairMu[,1],D=dataFinal$D[,1],Q=sqrt(1/out.mat$p.proc[prow]))
       if(dataFinal$N>1){
         for(i in 2:dataFinal$N){
           initialXs <- rbeta(Nmc,dataFinal$x1.a[i],dataFinal$x1.b[i])
-          ysPred <- cbind(ysPred,forecastStep(IC=initialXs,b0=b0,b1=b1,b2=b2,b3=b3,b4=b4,
+          ysPred <- cbind(ysPred,forecastStep(IC=initialXs,b0=b0,b3=b3,b4=b4,
                                               n=Nmc,NT=NT,Tair=dataFinal$TairMu[,i],D=dataFinal$D[,i],Q=sqrt(1/out.mat$p.proc[prow])))
         }
       }
@@ -139,7 +137,7 @@ uncertaintyAnalysisHindcast_expBreak <- function(calSite,n=183){
       }
       
       plot(seq(1,length(dataFinal$p)),dataFinal$p,pch=20,main=paste(siteName,"with calibration",calSite,n),ylim=c(0,1),xlim=c(0,2500))
-      ecoforecastR::ciEnvelope(seq(1,length(dataFinal$p)),ci[1,],ci[3,],col=col.alpha("green",0.5))
+      ciEnvelope(seq(1,length(dataFinal$p)),ci[1,],ci[3,],col=col.alpha("green",0.5))
       abline(v=tran_days,col="red",lty=2,lwd=1)
       abline(v=mean_tran_days,col="red",lwd=1)
       abline(v=cal_tran_days,col="cyan",lwd=1)

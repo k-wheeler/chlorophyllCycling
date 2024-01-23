@@ -1,7 +1,7 @@
 library("reticulate")
 library(doParallel)
 source('generalVariables.R')
-n.cores <- 24
+source('generalVariables.R')
 
 #register the cores.
 registerDoParallel(cores=n.cores)
