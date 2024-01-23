@@ -33,7 +33,7 @@ foreach(i=1:nrow(siteData)) %dopar% {
   
   area <- rep(round(c(lat, long) * 4) / 4, 2)
   
-  fname <- file.path(ERAdataFolder, paste0(siteName,"_",start_date,"_",end_date,"_era5TemperatureMembers.nc"))
+  fname <- file.path(ERA5dataFolder, paste0(siteName,"_",start_date,"_",end_date,"_era5TemperatureMembers.nc"))
 
   if(!file.exists(fname)){
     do_next <- tryCatch({

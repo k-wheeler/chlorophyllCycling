@@ -3,10 +3,6 @@ library(runjags)
 library(doParallel)
 source('generalVariables.R')
 
-dataDirectory <- "data/"
-
-allSites <- as.character(siteData$siteName)
-
 allTrans <- matrix(nrow=length(allSites),ncol=14)
 colnames(allTrans) <- c("siteName","meanDOY",seq(1,12))
 for(s in 1:length(allSites)){

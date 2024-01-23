@@ -1,6 +1,7 @@
 library(phenopix)
 library(zoo)
 source('generalVariables.R')
+source('downloadPhenocam.R')
 
 estimateDatesAndScale <- function(p,siteName,year){
   newP <- zoo(na.approx(p))

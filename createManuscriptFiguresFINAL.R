@@ -118,17 +118,17 @@ for(i in 1:5){
       includeP[,(yearInt+2)] <- NA
     }
 
-    points(dates,includeP,col=col.alpha("black",1),pch=19,cex=0.75)
+    points(dates,includeP,col=alpha("black",1),pch=19,cex=0.75)
     
-    points(dates,excludeP,col=col.alpha("red",1),pch=19,cex=0.75)
+    points(dates,excludeP,col=alpha("red",1),pch=19,cex=0.75)
     if(i==1){
-      ciEnvelope(dates[c(seq(1,4*184),seq((5*184+1),(10*184)))],ci[1,],ci[3,],col=col.alpha("blue",0.50))
+      ciEnvelope(dates[c(seq(1,4*184),seq((5*184+1),(10*184)))],ci[1,],ci[3,],col=alpha("blue",0.50))
       polygon(x=c((4*184),(4*184),(5*184),(5*184)),c(0,1.2,1.2,0),col="white",border=NA)
     }else if(i==2){
-      ciEnvelope(dates[c(seq((2*184+1),(7*184)),seq((8*184+1),(10*184)))],ci[1,],ci[3,],col=col.alpha("blue",0.50))
+      ciEnvelope(dates[c(seq((2*184+1),(7*184)),seq((8*184+1),(10*184)))],ci[1,],ci[3,],col=alpha("blue",0.50))
       polygon(x=c((7*184),(7*184),(8*184),(8*184)),c(0,1.2,1.2,0),col="white",border=NA)
     }else if(i == 3 | i==4){
-      ciEnvelope(dates[737:length(dates)],ci[1,],ci[3,],col=col.alpha("blue",0.50))
+      ciEnvelope(dates[737:length(dates)],ci[1,],ci[3,],col=alpha("blue",0.50))
     }
   }else{
     plot(dates,rep(NA,length(dates)),pch=20,xlab="Date",ylim=c(0,1),ylab="",
@@ -137,16 +137,16 @@ for(i in 1:5){
                                               as.Date("2022-12-31"),"year"),pos=-0.02,cex=2,cex.axis=1.5)
     includeP <- dataFinal$p
     includeP[,yearInt] <- NA
-    points(dates,includeP,col=col.alpha("black",1),pch=19,cex=0.75)
+    points(dates,includeP,col=alpha("black",1),pch=19,cex=0.75)
     
     excludeP <- dataFinal$p
     excludeP[1:n,-yearInt] <- NA
-    points(dates,excludeP,col=col.alpha("red",1),pch=17,cex=0.75)
-    ciEnvelope(dates[369:length(dates)],ci[1,],ci[3,],col=col.alpha("blue",0.50))
+    points(dates,excludeP,col=alpha("red",1),pch=17,cex=0.75)
+    ciEnvelope(dates[369:length(dates)],ci[1,],ci[3,],col=alpha("blue",0.50))
   }
   axis(side=2,at=c(0,0.2,0.4,0.6,0.8,1.0),labels=seq(0,1,0.2),pos=-1,cex=2,cex.axis=1.5)
   if(i==3){
-    legend(0,1,col=c("black","red",col.alpha("blue",0.50)),c("Calibration Data","Validation Data","Model Prediction CI"),pch=c(19,17,15),
+    legend(0,1,col=c("black","red",alpha("blue",0.50)),c("Calibration Data","Validation Data","Model Prediction CI"),pch=c(19,17,15),
            bty="n",cex=1.5)
   }
 }
@@ -701,7 +701,7 @@ dev.off()
 
 jpeg("transferabilityCount_DensityPlots.jpeg",width=6,height=5,units = "in",res=1000)
 plot(density(apply(OOScrpsALL,MARGIN = 1,FUN=sum)/70*100),bty="n",xlab="Percentage of Sites (%)",ylab="Density",
-     main="",lwd=2,xlim=c(0,100),col=col.alpha(cols[1],0.4),lty=3)
+     main="",lwd=2,xlim=c(0,100),col=alpha(cols[1],0.4),lty=3)
 lines(density(apply(OOScrpsTRAN,MARGIN = 1,FUN=sum,na.rm=TRUE)/70*100),lty=4,lwd=2,col=cols[3])
 lines(density(apply(OOScrpsBEF,MARGIN = 1,FUN=sum,na.rm=TRUE)/70*100),lty=5,lwd=2,col=cols[4])
 lines(density(apply(OOScrpsAFT,MARGIN = 1,FUN=sum)/70*100),lty=1,lwd=2,col=cols[5])

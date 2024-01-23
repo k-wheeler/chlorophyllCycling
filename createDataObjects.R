@@ -111,10 +111,8 @@ foreach(s=1:nrow(siteData)) %dopar% {
           finalYrs <- c(finalYrs,i)
           sofs <- c(sofs,(fittedDat[valNum,'FallStartDay']-181)) ######Change for start if needed
           TairMu <- cbind(TairMu,subDat$TairMu)
-          TairMuDay <- cbind(TairMuDay,subDat$TairMuDay)
           D <- cbind(D,subDat$D)
           TairPrec <- cbind(TairPrec,subDat$TairPrec)
-          TairPrecDay <- cbind(TairPrecDay,subDat$TairPrecDay)
         }
       }
     }
@@ -142,8 +140,6 @@ foreach(s=1:nrow(siteData)) %dopar% {
     
     dataFinal$TairMu <- TairMu
     dataFinal$TairPrec <- TairPrec
-    dataFinal$TairMuDay <- TairMuDay
-    dataFinal$TairPrecDay <- TairPrecDay
     dataFinal$D <- D
     
     save(dataFinal,file=paste0(dataDirectory,siteName,"_dataFinal.RData"))

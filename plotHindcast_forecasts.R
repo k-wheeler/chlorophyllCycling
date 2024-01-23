@@ -1,6 +1,7 @@
 library('rjags')
 library('runjags')
 library('RColorBrewer')
+library('scales')
 source('generalVariables.R')
 source('ciEnvelope.R')
 
@@ -48,7 +49,7 @@ for(s in 1:length(sites)){
       }
       
       plot(seq(1,length(dataFinal$p)),dataFinal$p,pch=20,main=paste0(siteName," ",n,convergedWell),ylim=c(0,1),xlim=c(0,2500))
-      ciEnvelope(seq(1,length(dataFinal$p)),ci[1,],ci[3,],col=col.alpha("blue",0.5))
+      ciEnvelope(seq(1,length(dataFinal$p)),ci[1,],ci[3,],col=alpha("blue",0.5))
       points(seq(1,length(dataFinal$p)),dataFinal$p,pch=20,col="red")
       includeP <- dataFinal$p
       includeP[(n+1):nrow(includeP),] <- NA

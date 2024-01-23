@@ -1,5 +1,6 @@
 library(rjags)
 library(runjags)
+library(scales)
 source('ciEnvelope.R')
 source('generalVariables.R')
 
@@ -52,7 +53,7 @@ for(s in 1:nrow(siteData)){
           ci <- apply(ycred,2,quantile,c(0.025,0.5,0.975))
           tran.ci <- quantile(k,c(0.025,0.5,0.975))
           
-          ciEnvelope(days,ci[1,],ci[3,],col=col.alpha("lightblue",0.5))
+          ciEnvelope(days,ci[1,],ci[3,],col=alpha("lightblue",0.5))
           points(days,dataFinal$p[,yr],pch=20)
           abline(v=tran.ci[2],col="blue")
           abline(v=tran.ci[1],col="blue",lty=2)

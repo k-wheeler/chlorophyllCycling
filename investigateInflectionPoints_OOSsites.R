@@ -4,7 +4,6 @@ library('RColorBrewer')
 library(doParallel)
 source('generalVariables.R')
 
-
 #Create forecast step model:
 #' Basic logistic forecast step
 #'

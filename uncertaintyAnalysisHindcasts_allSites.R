@@ -1,6 +1,7 @@
 library('rjags')
 library('runjags')
 library('RColorBrewer')
+library('scales')
 library('scoringRules')
 library(doParallel)
 source('generalVariables.R')
@@ -137,7 +138,7 @@ uncertaintyAnalysisHindcast_expBreak <- function(calSite,n=183){
       }
       
       plot(seq(1,length(dataFinal$p)),dataFinal$p,pch=20,main=paste(siteName,"with calibration",calSite,n),ylim=c(0,1),xlim=c(0,2500))
-      ciEnvelope(seq(1,length(dataFinal$p)),ci[1,],ci[3,],col=col.alpha("green",0.5))
+      ciEnvelope(seq(1,length(dataFinal$p)),ci[1,],ci[3,],col=alpha("green",0.5))
       abline(v=tran_days,col="red",lty=2,lwd=1)
       abline(v=mean_tran_days,col="red",lwd=1)
       abline(v=cal_tran_days,col="cyan",lwd=1)

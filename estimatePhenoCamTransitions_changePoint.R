@@ -70,7 +70,7 @@ foreach(s=1:nrow(siteData):1) %dopar% {
       }else{
         p <- dataFinal$p[,yr]
       }
-
+      
       j.model <- createChangepointModel_Fall(yobs=p)
       variables <- c("mS","mF","y[1]","k")
       var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=50000,
@@ -81,26 +81,6 @@ foreach(s=1:nrow(siteData):1) %dopar% {
         var.burn <- window(var.burn,thin=thinAmount)
       }
       save(var.burn,file=paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData"))
-    }else{
-      load((paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData")))
-      if(typeof(var.burn)==typeof(FALSE)){
-        if(length(which(dataFinal$p[,yr]<0.10))>0){
-          p <- dataFinal$p[1:(which(dataFinal$p[,yr]<0.10)[1]-1),yr]
-        }else{
-          p <- dataFinal$p[,yr]
-        }
-        
-        j.model <- createChangepointModel_Fall(yobs=p)
-        variables <- c("mS","mF","y[1]","k")
-        var.burn <- runMCMC_Model(j.model = j.model,variableNames = variables, baseNum=100000,
-                                  iterSize = 5000,sampleCutoff = 1000,maxGBR = 5)
-        if(typeof(var.burn)!=typeof(FALSE)){
-          out.mat <- as.matrix(var.burn)
-          thinAmount <- round(nrow(out.mat)/5000,digits=0)
-          var.burn <- window(var.burn,thin=thinAmount)
-        }
-        save(var.burn,file=(paste0(transitionEstimateOutputsFolder,siteName,"_",yrName,"_PhenoCam_changePointCurve_varBurn.RData")))
-      }
     }
   }
 }
