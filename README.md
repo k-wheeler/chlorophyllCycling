@@ -5,7 +5,9 @@ This document contains the names and descriptions of the different R scrips in t
 
 Email: kwheelerecology@gmail.com
 
-The scripts require a site data csv file where the columns are siteName (PhenoCam's sitename), Lat, Long, URL (URL of data archive on PhenoCam site for specific site and ROI), PFT (i.e., DB), TZ (offset from GMT, e.g., -5 for ET), startDate (first date of full year of data, e.g., "2013-01-01"), URL2 (additional PhenoCam URL if switched cameras/ROI), URL3, endDate
+The scripts require a site data csv file ('allPhenocamDBsitesComplete.csv') where the columns are siteName (PhenoCam's sitename), Lat, Long, URL (URL of data archive on PhenoCam site for specific site and ROI), PFT (i.e., DB), TZ (offset from GMT, e.g., -5 for ET), startDate (first date of full year of data, e.g., "2013-01-01"), URL2 (additional PhenoCam URL if switched cameras/ROI), URL3, endDate
+
+The Phenocam site-years that were visually assessed as poor quality due to large gaps of missing gaps are in the file 'phenocamSitesBadYears.csv'
 
 In order to run code on your computer, file paths should be changed in the generalVariables.R file. This file also has other general variables and is sourced in all other R scripts. 
 
