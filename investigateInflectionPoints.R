@@ -3,26 +3,10 @@ library('runjags')
 library('RColorBrewer')
 library(doParallel)
 source('generalVariables.R')
-
-calculateStart <- function(ys,avgNum=10){
-  avgDiffs <- rep(0,avgNum)
-  for(t in (avgNum + 1):(length(ys)-avgNum)){
-    prevAvg <- mean(diff(ys[1:(t-1)]),na.rm = TRUE)
-    newAvg <- mean(diff(ys[t:(t+avgNum)]),na.rm = TRUE)
-    avgDiffs <- c(avgDiffs,(newAvg-prevAvg))
-  }
-  avgDiffs <- c(avgDiffs,rep(0,avgNum))
-  return(avgDiffs)
-}
+source('calculateStart.R')
 
 ##Investigate model predictions!
-
 registerDoParallel(cores=n.cores)
-avgNum <- 15
-cutoff <- -0.02
-
-Nmc <- 1000
-
 ns <- seq(35,183)
 
 transData <- read.csv(allPhenoTranFile,header=TRUE)
@@ -64,7 +48,6 @@ foreach(s =1:length(sites)) %dopar% {
       yrName <- dataFinal$years[yr]
       print(yrName)
       if(converged){
-        
         yrPred <- pred.mat[1:Nmc,(184*(yr-1)+1):(184*(yr-1)+184)]
         
         avgDiffs <- matrix(nrow=Nmc,ncol=ncol(yrPred))

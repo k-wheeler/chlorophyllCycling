@@ -59,7 +59,7 @@ Note: In this code, the parameter values of b0, b3, and b4 correspond to b0, b1,
 
 * createCRPSpercentageMatrix.R #Creates a matrix of % site-years where our model is better than climatology over differing amounts of included data for Fig. 3c and creates files "crpsMat_includedVsDay_Complete.RData", "reorganizedDat_includedVsDay.RData", and "daysOffset_includedVsDay.RData"
 
-* testingImportanceOfTiming.R #Still in Development
+* testingImportanceOfTiming.R #Code to run a random forest model to investigate if the environmental conditions after the transition are a better predictor of the transition than those before
 
 
 #Create Figures
@@ -88,6 +88,6 @@ The file naming structure is below:
 
 * CRPS values of out of sample predictions:paste0("outOfSampleSites_crps_",calSite,"_183.csv")
 
-* Inflection for calibration sites: paste0(siteName,"_inflectionPointData_15.RData"))
+* Inflection for calibration sites (For each site, year, and number of days per year included combination model run, if the model converged well and what was the lowest second difference in the predictions to indicate curvature): paste0(siteName,"_inflectionPointData_15.RData"))
 
 * Inflection for out of sample predictions: paste0(calSite,"_inflectionPointData_OOSsites_mean15_",n,".RData")

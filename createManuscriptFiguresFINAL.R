@@ -8,30 +8,17 @@ library('scales')
 source('generalVariables.R')
 source('ciEnvelope.R')
 source('downloadPhenocam.R')
+source('calculateStart.R')
 
 tranOffsets <- read.csv(allPhenoTranFile,header=TRUE)
-cutOff <- -0.02 #Cut-off For the value of second-differences that constitutes an inflection based off of PhenoCam data
-NT <- 184
-avgN <- 15
-days <- seq(1,NT)
 
+#General Functions ----
 lmp <- function (modelobject) {
   if (class(modelobject) != "lm") stop("Not an object of class 'lm' ")
   f <- summary(modelobject)$fstatistic
   p <- pf(f[1],f[2],f[3],lower.tail=F)
   attributes(p) <- NULL
   return(p)
-}
-
-calculateStart <- function(ys,avgNum=10){
-  avgDiffs <- rep(0,avgNum)
-  for(t in (avgNum + 1):(length(ys)-avgNum)){
-    prevAvg <- mean(diff(ys[1:(t-1)]),na.rm = TRUE)
-    newAvg <- mean(diff(ys[t:(t+avgNum)]),na.rm = TRUE)
-    avgDiffs <- c(avgDiffs,(newAvg-prevAvg))
-  }
-  avgDiffs <- c(avgDiffs,rep(0,avgNum))
-  return(avgDiffs)
 }
 
 ##Supplementary Figure to show names of different parts of the curve ----
@@ -44,18 +31,15 @@ polygon(c(0.01,182,182,0.01),c(0.355,0.355,0.50,0.50),col="gray",border = NA)
 points(phenoDataSub$gcc_90[phenoDataSub$year==2013],pch=20)
 dev.off()
 
-
 #Figure 1: Time-series Examples ----
 ##Example Time-series model fit figure: willowcreek 76; lacclair 43; lacclair 65; howland2 183; alligator 183 
 selectSites <- c("howland2","alligatorriver","lacclair","lacclair","willowcreek")
-ns <- c(183,183,43,65,76)
+ns <- c(183,183,43,65,76) #The number of days each year after July 1 to include
 tles <- c("Howland, Maine, USA: All Autumn Days/Year Calibration",
           "Alligator River, North Carolina, USA: All Autumn Days/Year Calibration",
           "Lacclair, Quebec, Canada: 43 Days/Year Calibration",
           "Lacclair, Quebec, Canada: 65 Days/Year Calibration",
           "Willow Creek, Wisconsin, USA: 76 Days/Year Calibration")
-dataDirectory <- "data/"
-Nmc <- 5000
 
 newYears <- numeric()
 for(yr in 1:12){
@@ -75,14 +59,9 @@ for(i in 1:5){
   yearInt <- which(dataFinal$years==yearRemoved)
   fileName <- paste0(CCmodelOutputsFolder,siteName,"_",n,"_ccModel_forecast_calibration_varBurn.RData")
   load(fileName)
-  if(typeof(out.burn)==typeof(FALSE)){
-    fileName <- paste0('finalVarBurns/partial_',siteName,"_meanTemp_summer",n,"_expBreak_slope_forecast_b3_calibration_varBurn.RData")
-    load(fileName)
-    out.burn <- partialOutput
-  }
 
   out.mat <- data.frame(as.matrix(out.burn$params))
-  prow = sample.int(nrow(out.mat),Nmc,replace=TRUE)
+  prow = sample.int(nrow(out.mat), Nmc ,replace=TRUE)
   
   b0 <- out.mat$b0[prow]
   b4 <- out.mat$b4[prow]
@@ -153,13 +132,12 @@ for(i in 1:5){
 dev.off()
 
 #Inflection Figures ----
-##Supplementary Figure X: Cumulative ratio of inflection ----
+##Supplementary Figure S2: Cumulative ratio of inflection ----
 
 for(s in 1:length(sites)){
   siteName <- as.character(sites[s])
   print(siteName)
   load(paste0(siteName,"_inflectionPointData_15.RData")) #Created in investigateInflectionPoints.R
-  
   if(s==1){
     allOutput <- outputData
   }else{
@@ -214,7 +192,8 @@ legend('topleft',col=c("black","red"),c("All","Validation"),lty=c(1,2),
        bty="n",cex=1)
 dev.off()
 
-##Figure 2: Correlation between maximum inflections: ----
+##Figure 4: Correlation between maximum inflections: ----
+#Determine maximum inflections (minimum second difference) in PhenoCam data
 phenoCamInflectionDat <- (matrix(ncol=3,nrow=0))
 colnames(phenoCamInflectionDat) <- c("siteName","year","minDiffDiff_PC") #Calculate minimum second differences for PhenoCam data
 for(s in 1:length(sites)){
@@ -232,7 +211,7 @@ allOutput$siteYear <- paste0(allOutput$siteName,allOutput$year)
 phenoCamInflectionDat <- data.frame(phenoCamInflectionDat)
 phenoCamInflectionDat$siteYear <- paste0(phenoCamInflectionDat$siteName,phenoCamInflectionDat$year)
 
-offsetVals <- seq(min(outputData$offset),max(outputData$offset))
+offsetVals <- seq(min(outputData$offset),max(outputData$offset)) #What is the offset (how far from the transition dates was data included) for each of the model calibrations
 
 ##Pad allOutput to replace missing offset values at the end with last available data
 allOutput <- allOutput[as.logical(allOutput$converged),]
@@ -266,6 +245,7 @@ for(s in 1:length(sites)){
   }
 }
 
+#Initiate vectors for different statistics from the linear models performed at each offset value (# of calibration days relative to SOS date)
 ps <- numeric()
 psOOS <- numeric()
 fs <- numeric()
@@ -307,8 +287,6 @@ par(mai=c(0.8,0.8,0.5,0.8))
 par(mfrow=c(1,2))
 
 n=10
-#n=127
-print(n)
 allOutputTrans <- allOutput[allOutput$offset==n,]
 mergedDat <- merge(allOutputTrans,phenoCamInflectionDat)
 mergedDat$minDiffDiff_PC <- as.numeric(as.character(mergedDat$minDiffDiff_PC))
@@ -323,14 +301,11 @@ legend("topleft",lwd=3,lty=4,"Line of Best Fit",col="cyan",cex=1.25,bty="n")
 plot(offsetVals,ps,pch=20,bty="n",xlab="Days Included Relative to Transition Date",ylab="p-value",xlim=c(-70,130),ylim=c(0,1))
 abline(h=0.05,col="gray",lty=2,lwd=2)
 points(offsetVals,ps,pch=20)
-#points(offsetVals,psOOS,pch=20,col=alpha("red",0.5))
 points(10,ps[offsetVals==10],col="cyan",pch=20)
-#points(offsetVals,psOOS,col="red",pch=17)
-# legend('topleft',col=c("black","red"),c("All","Validation"),pch=c(19,17),
-#        bty="n",cex=1)
+
 dev.off()
 
-##Supplementary Figure **: Statistics and include validation years 
+##Supplementary Figure S3: Statistics and include validation years 
 jpeg("correlationPvsIncludedDOY_statisticsWithValidation.jpeg",width=5,height=5,units = "in",res=1000)
 par(mai=c(0.6,0.6,0.2,0.2))
 par(mfrow=c(3,1))
@@ -351,7 +326,6 @@ points(offsetVals,sizesOOS,pch=17,col=alpha("red",1))
 text(-50,150,"c)",cex=2)
 
 dev.off()
-
 
 #Figure 3: CRPS Over time ----
 
@@ -585,8 +559,9 @@ legend('topleft',c('< 25%','25-49%','50-74%','> 74%'),
 
 dev.off()
 
-#Figure 4: Transferability ---- 
-plotOOSWithheldYear <- function(type,vl,sites,allSites){
+#Figure S1: Transferability of calibrations to other sites ---- 
+plotOOSWithheldYear <- function(type,sites,allSites){
+  vl <- 2 #Indicates CRPS differences in file
   OOScrps <- matrix(nrow=length(sites),ncol=70)
   temps <- matrix(nrow=length(sites),ncol=70)
   precips <- matrix(nrow=length(sites),ncol=70)
@@ -600,58 +575,49 @@ plotOOSWithheldYear <- function(type,vl,sites,allSites){
   tranOffsets <- read.csv(allPhenoTranFile,header=TRUE)
   
   for(i in 1:length(sites)){
-
     siteName <- sites[i]
     print(siteName)
     calSite <- siteName
     crpsDat <- read.csv(file=paste0("outOfSampleSites_crps_",calSite,"_183.csv"),header=FALSE) #Created in uncertaintyAnalysisHindcasts_allSites.R
-
+    
     j <- 1
-    calInfo <- siteData[as.character(siteData$siteName)==calSite,]
+    calInfo <- siteDataSummary[as.character(siteDataSummary$siteName)==calSite,]
     
     for(st in 1:length(allSites)){
       siteName <- allSites[st]
-      #print(siteName)
       s <- which(crpsDat[,1]==siteName)[vl]
-      siteInfo <- siteData[as.character(siteData$siteName)==siteName,]
+      siteInfo <- siteDataSummary[as.character(siteDataSummary$siteName)==siteName,]
       load(paste0(dataDirectory,siteName,"_dataFinal.RData")) #Load Data
       yearRemoved <- dataFinal$yearRemoved
       
       yr <- which(dataFinal$years==yearRemoved)
       tranID <- which(tranOffsets$siteName==siteName)
       tran_DOY <- round((as.numeric(tranOffsets[tranID,(yr+2)])+as.numeric(tranOffsets[tranID,2])-182),digits=0)
-      
+
       siteYearDat <- crpsDat[s,((184*(yr-1)+1)+2):((184*(yr-1)+184)+2)]
 
+      
       if(type=="all"){
-        if(vl==1){ #crps vals
-          OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat),na.rm=TRUE)))
-        }else if(vl==2){ #crps differences
-          OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat),na.rm=TRUE)<0))
-        }
-      }else if(type=="divergence"){
-        if(vl==1){ #crps vals
-          OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat[1:tran_DOY+20]),na.rm=TRUE)))
-        }else if(vl==2){ #crps differences
-          OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat[1:tran_DOY+20]),na.rm=TRUE)<0))
-        }
+        
+        OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat),na.rm=TRUE)<0))
+        
       }else if(type=="transition"){
-        if(vl==1){ #crps vals
-          OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat[(tran_DOY-3):(tran_DOY+3)]),na.rm=TRUE)))
-        }else if(vl==2){ #crps differences
+        if(!is.na(tran_DOY)){
           OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat[(tran_DOY-3):(tran_DOY+3)]),na.rm=TRUE)<0))
+        }else{
+          OOScrps[i,j] <- NA
         }
       }else if(type=="before"){
-        if(vl==1){ #crps vals
-          OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat[(tran_DOY-6):(tran_DOY)]),na.rm=TRUE)))
-        }else if(vl==2){ #crps differences
+        if(!is.na(tran_DOY)){
           OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat[(tran_DOY-6):(tran_DOY)]),na.rm=TRUE)<0))
+        }else{
+          OOScrps[i,j] <- NA
         }
       }else if(type=="after"){
-        if(vl==1){ #crps vals
-          OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat[(tran_DOY):(tran_DOY+6)]),na.rm=TRUE)))
-        }else if(vl==2){ #crps differences
+        if(!is.na(tran_DOY)){
           OOScrps[i,j] <- as.numeric((mean(as.numeric(siteYearDat[(tran_DOY):(tran_DOY+6)]),na.rm=TRUE)<0))
+        }else{
+          OOScrps[i,j] <- NA
         }
       }
       temps[i,j] <- abs(siteInfo$MAT - calInfo$MAT)
@@ -664,7 +630,6 @@ plotOOSWithheldYear <- function(type,vl,sites,allSites){
       
       j=j+1
     }
-
   }
   if(type=="after"){
     mdl <- lm(as.vector(OOScrps)~as.vector(temps)+as.vector(maxs)+as.vector(lats))
@@ -675,10 +640,10 @@ plotOOSWithheldYear <- function(type,vl,sites,allSites){
   }
   return(OOScrps)
 }
-OOScrpsALL <- plotOOSWithheldYear(type="all",vl=2,sites=sites,allSites = allSites)
-OOScrpsTRAN <- plotOOSWithheldYear(type="transition",vl=2,sites=sites,allSites = allSites)
-OOScrpsBEF <- plotOOSWithheldYear(type="before",vl=2,sites=sites,allSites = allSites)
-OOScrpsAFT <- plotOOSWithheldYear(type="after",vl=2,sites=sites,allSites = allSites)
+OOScrpsALL <- plotOOSWithheldYear(type="all",sites=sites,allSites = allSites)
+OOScrpsTRAN <- plotOOSWithheldYear(type="transition",sites=sites,allSites = allSites)
+OOScrpsBEF <- plotOOSWithheldYear(type="before",sites=sites,allSites = allSites)
+OOScrpsAFT <- plotOOSWithheldYear(type="after",sites=sites,allSites = allSites)
 
 cols <- c("#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e")
 jpeg("transferabilityCount_examplePiePlots.jpeg",width=4.5,height=4.5,units = "in",res=1000)
@@ -688,13 +653,13 @@ selectedSite <- "umichbiological"
 slices <- c(sum(OOScrpsALL[sites==selectedSite ,]),70-sum(OOScrpsALL[sites==selectedSite ,]))
 pie(slices,labels=c("% Better","% Worst"),col=c(cols[1],"white"),main="a) Full Autumn")
 
-slices <- c(sum(OOScrpsTRAN[sites==selectedSite ,]),70-sum(OOScrpsTRAN[sites==selectedSite ,]))
+slices <- c(sum(OOScrpsTRAN[sites==selectedSite ,],na.rm=TRUE),70-sum(OOScrpsTRAN[sites==selectedSite ,],na.rm=TRUE))
 pie(slices,labels=c("% Better","% Worst"),col=c(cols[3],"white"),main="b) Within 3 Days")
 
-slices <- c(sum(OOScrpsBEF[sites==selectedSite ,]),70-sum(OOScrpsBEF[sites==selectedSite ,]))
+slices <- c(sum(OOScrpsBEF[sites==selectedSite ,],na.rm=TRUE),70-sum(OOScrpsBEF[sites==selectedSite ,],na.rm=TRUE))
 pie(slices,labels=c("% Better","% Worst"),col=c(cols[4],"white"),main="c) 0-6 Days Before")
 
-slices <- c(sum(OOScrpsAFT[sites==selectedSite ,]),70-sum(OOScrpsAFT[sites==selectedSite ,]))
+slices <- c(sum(OOScrpsAFT[sites==selectedSite ,],na.rm=TRUE),70-sum(OOScrpsAFT[sites==selectedSite ,],na.rm=TRUE))
 pie(slices,labels=c("% Better","% Worst"),col=c(cols[5],"white"),main="d) 0-6 Days After")
 
 dev.off()
@@ -704,25 +669,17 @@ plot(density(apply(OOScrpsALL,MARGIN = 1,FUN=sum)/70*100),bty="n",xlab="Percenta
      main="",lwd=2,xlim=c(0,100),col=alpha(cols[1],0.4),lty=3)
 lines(density(apply(OOScrpsTRAN,MARGIN = 1,FUN=sum,na.rm=TRUE)/70*100),lty=4,lwd=2,col=cols[3])
 lines(density(apply(OOScrpsBEF,MARGIN = 1,FUN=sum,na.rm=TRUE)/70*100),lty=5,lwd=2,col=cols[4])
-lines(density(apply(OOScrpsAFT,MARGIN = 1,FUN=sum)/70*100),lty=1,lwd=2,col=cols[5])
+lines(density(apply(OOScrpsAFT,MARGIN = 1,FUN=sum,na.rm=TRUE)/70*100),lty=1,lwd=2,col=cols[5])
 legend("topright",c("Full Autumn","Within 3 Days","6 Days Before","6 Days After"),
        lwd=rep(2,2),lty=c(3,4,5,1),bty="n",col=cols[c(1,3,4,5)])
 dev.off()
 
-output <- cbind(sites,round(apply(OOScrpsAFT,MARGIN = 1,FUN=sum)/70*100,digits=0),
+output <- cbind(sites,round(apply(OOScrpsAFT,MARGIN = 1,FUN=sum,na.rm=TRUE)/70*100,digits=0),
                 round(apply(OOScrpsTRAN,MARGIN = 1,FUN=sum,na.rm=TRUE)/70*100,digits=0),
                 round(apply(OOScrpsBEF,MARGIN = 1,FUN=sum,na.rm=TRUE)/70*100,digits=0),
                 round(apply(OOScrpsALL,MARGIN = 1,FUN=sum)/70*100,digits=0))
 output <- output[order(as.numeric(output[,2]),decreasing = TRUE),]
 write.csv(output,file="transferabilityPercentBetter.csv",row.names=FALSE,quote=FALSE)
 
-#Supplementary Figure: Boston Common Time-series Examples and Fits ----
-siteName <- "bostoncommon"
-load(paste0(dataDirectory,siteName,"_dataFinal.RData")) #Load Data
-
-#jpeg("curvePartsFigureRAW.jpeg",width=10,height=4.4,units = "in",res=1000)
-plot(as.vector(dataFinal$p),pch=20)
-plot(phenoDataSub$date,phenoDataSub$gcc_90,pch=20,ylab="PhenoCam GCC",bty="n")
-polygon(c(0.01,182,182,0.01),c(0.355,0.355,0.50,0.50),col="gray",border = NA)
-points(phenoDataSub$gcc_90[phenoDataSub$year==2013],pch=20)
-dev.off()
+#Fig. 5: Importance of Timing Random Forest Figure ----
+##Created in testingImportanceOfTiming.R file

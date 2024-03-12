@@ -19,7 +19,7 @@ for(s in 1:length(allSites)){
       if(typeof(var.burn)!=typeof(FALSE)){
         var.mat <- data.frame(as.matrix(var.burn))
 
-        if(sd(var.mat$k)<7){
+        if(sd(var.mat$k)<7){ #Not including if the confidence on the estimate is really poor
           transDates <- c(transDates,(182+mean(var.mat$k)))
         }else{
           transDates <- c(transDates,NA)
