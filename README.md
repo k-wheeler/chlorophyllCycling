@@ -39,9 +39,6 @@ Note: In this code, the parameter values of b0, b3, and b4 correspond to b0, b1,
 
 * createModelCalibrations_CCmodel.R #Calibrates chlorophyll cycling model to defined sites and number of included day of years and saves it each in file=paste0(CCmodelOutputsFolder,siteName,"_",n,"_ccModel_forecast_calibration_varBurn.RData")
 
-* createModelCalibrations_triggerModel.R #STILL IN DEVELOPMENT
-
-
 #Validation site predictions
 * uncertaintyAnalysisHindcasts_allSites.R #Validation site predictions for each calibration site 
 
@@ -70,7 +67,7 @@ Note: In this code, the parameter values of b0, b3, and b4 correspond to b0, b1,
 
 #Extra
 * ciEnvelope.R #Function to plot credible interval polygon on figures
-
+* calculateStart.R #Function to determine when the start of senescence is based off of second difference (inflection point)
 
 The file naming structure is below: 
 
